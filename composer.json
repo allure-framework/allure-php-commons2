@@ -54,7 +54,7 @@
   "scripts": {
     "test-cs": "vendor/bin/phpcs -sp",
     "test-unit": "vendor/bin/phpunit",
-    "test-psalm": "vendor/bin/psalm --threads=8",
+    "test-psalm": "vendor/bin/psalm",
     "test": [
       "@test-cs",
       "@test-unit",
