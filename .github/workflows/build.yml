@@ -13,14 +13,29 @@ jobs:
   tests:
     name: PHP ${{ matrix.php-version }} on ${{ matrix.os }} w/ ${{ matrix.dependencies }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         php-version:
           - "8.0"
-          - "8.1"
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        dependencies: ['update --prefer-lowest', 'update']
+        os: 
+          - ubuntu-latest
+          - windows-latest
+          - macOS-latest
+        dependencies: 
+          - 'update --prefer-lowest'
+          - 'update'
+        experimental: 
+          - false
+        composer-options:
+          - ""
+        include:
+          - php-version: "8.1"
+            os: ubuntu-latest
+            dependencies: 'update'
+            experimental: true
+            composer-options: "--ignore-platform-req"
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -35,7 +50,7 @@ jobs:
           extensions: pcntl, posix
         
       - name: Install dependencies
-        run: composer ${{ matrix.dependencies }} --prefer-dist --no-progress --ignore-platform-reqs
+        run: composer ${{ matrix.dependencies }} --prefer-dist --no-progress ${{ matrix.composer-options }}
 
       - name: Run tests
         run: composer test
