@@ -1,0 +1,64 @@
+{
+  "name": "allure-framework/allure-php-commons",
+  "keywords": [
+    "php",
+    "report",
+    "testing",
+    "allure",
+    "commons"
+  ],
+  "description": "Allure PHP commons",
+  "homepage": "http://allure.qatools.ru/",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Dmitry Baev",
+      "email": "baev.dm@gmail.com",
+      "role": "Developer"
+    },
+    {
+      "name": "Edward Surov",
+      "email": "zoohie@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "allure@qameta.io",
+    "source": "https://github.com/allure-framework/allure-php-commons"
+  },
+  "require": {
+    "php": "^8",
+    "ext-json": "*",
+    "doctrine/annotations": "^1.12",
+    "psr/log": "^1",
+    "ramsey/uuid": "^3 || ^4"
+  },
+  "require-dev": {
+    "jetbrains/phpstorm-attributes": "^1",
+    "phpunit/phpunit": "^9.5.8",
+    "psalm/plugin-phpunit": "^0.16.1",
+    "squizlabs/php_codesniffer": "^3.6",
+    "vimeo/psalm": "^4.9.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Qameta\\Allure\\": "src",
+      "Yandex\\Allure\\Adapter\\": "src/Legacy"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Qameta\\Allure\\Test\\": "test"
+    }
+  },
+  "scripts": {
+    "test-cs": "vendor/bin/phpcs -sp",
+    "test-unit": "vendor/bin/phpunit",
+    "test-psalm": "vendor/bin/psalm --threads=8",
+    "test": [
+      "@test-cs",
+      "@test-unit",
+      "@test-psalm"
+    ]
+  }
+}
