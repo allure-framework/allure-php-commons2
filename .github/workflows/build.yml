@@ -32,7 +32,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-
+          extensions: pcntl, posix
+        
       - name: Install dependencies
         run: composer ${{ matrix.dependencies }} --prefer-dist --no-progress --ignore-platform-reqs
 
