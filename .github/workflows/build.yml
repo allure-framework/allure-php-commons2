@@ -11,7 +11,7 @@ on:
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php-version }} on ${{ matrix.os }} w/ ${{ matrix.dependencies }}
+    name: PHP ${{ matrix.php-version }} on ${{ matrix.os }} (${{ matrix.composer-options }})
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
     strategy:
@@ -23,17 +23,14 @@ jobs:
           - ubuntu-latest
           - windows-latest
           - macOS-latest
-        dependencies: 
-          - 'update --prefer-lowest'
-          - 'update'
-        experimental: 
+        experimental:
           - false
         composer-options:
           - ""
+          - "--prefer-lowest"
         include:
           - php-version: "8.1"
             os: ubuntu-latest
-            dependencies: 'update'
             experimental: true
             composer-options: "--ignore-platform-req=php"
     steps:
@@ -50,7 +47,10 @@ jobs:
           extensions: pcntl, posix
         
       - name: Install dependencies
-        run: composer ${{ matrix.dependencies }} --prefer-dist --no-progress ${{ matrix.composer-options }}
+        run: composer update
+          --prefer-dist
+          --no-progress
+          ${{ matrix.composer-options }}
 
       - name: Run tests
         run: composer test
