@@ -66,17 +66,16 @@ final class ExceptionThrowingLogger implements LoggerInterface
     {
         $this->delegate->log($level, $message, $context);
         if ($this->shouldThrowException($level)) {
+            /**
+             * @psalm-suppress RedundantConditionGivenDocblockType
+             * @psalm-suppress DocblockTypeContradiction
+             */
+            $messageTemplate = is_string($message) ? $message : (string) $message;
+
             /** @var mixed $previous */
             $previous = $context['exception'] ?? null;
             throw new RuntimeException(
-                /**
-                 * @psalm-suppress RedundantConditionGivenDocblockType
-                 * @psalm-suppress DocblockTypeContradiction
-                 */
-                $this->buildMessage(
-                    is_string($message) ? $message : (string) $message,
-                    $context,
-                ),
+                $this->buildMessage($messageTemplate, $context),
                 0,
                 $previous instanceof Throwable ? $previous : null,
             );
