@@ -16,6 +16,11 @@ final class ThreadContext implements ThreadContextInterface
      */
     private array $stacksByThread = [];
 
+    /**
+     * @var array<string, string>
+     */
+    private array $containersByThread = [];
+
     private string $thread = self::DEFAULT_THREAD;
 
     public function switchThread(?string $thread): ThreadContextInterface
@@ -65,5 +70,24 @@ final class ThreadContext implements ThreadContextInterface
         return isset($top) && $top > 0
             ? $this->stacksByThread[$this->thread][$top] ?? null
             : null;
+    }
+
+    public function resetContainer(): ThreadContextInterface
+    {
+        unset($this->containersByThread[$this->thread]);
+
+        return $this;
+    }
+
+    public function setContainer(string $uuid): ThreadContextInterface
+    {
+        $this->containersByThread[$this->thread] = $uuid;
+
+        return $this;
+    }
+
+    public function getContainer(): ?string
+    {
+        return $this->containersByThread[$this->thread] ?? null;
     }
 }
