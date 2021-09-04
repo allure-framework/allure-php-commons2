@@ -56,12 +56,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 $container->setStart($this->clock->now()),
             );
             $this->container = $container->getUuid();
-            $isSuccess = true;
+            $error = null;
         } catch (Throwable $e) {
-            $isSuccess = false;
             $this->logException('Container (UUID: {uuid}) not started', $e, ['uuid' => $container->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterContainerStart($container, $isSuccess);
+        $this->notifier->afterContainerStart($container, $error);
     }
 
     /**
@@ -82,10 +82,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
         $this->notifier->beforeContainerUpdate($container);
         try {
             $update($container);
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Container (UUID: {uuid}) not updated', $e, ['uuid' => $container->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterContainerUpdate($container);
+        $this->notifier->afterContainerUpdate($container, $error);
 
         return $container->getUuid();
     }
@@ -104,10 +106,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
         try {
             $container->setStop($this->clock->now());
             $this->container = null;
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Container (UUID: {uuid}) not stopped', $e, ['uuid' => $container->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterContainerStop($container);
+        $this->notifier->afterContainerStop($container, $error);
 
         return $container->getUuid();
     }
@@ -132,10 +136,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 $this->resultsWriter->writeContainer($container);
             }
             $this->storage->unset($container->getUuid());
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Container (UUID: {uuid}) not written', $e, ['uuid' => $container->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterContainerWrite($container);
+        $this->notifier->afterContainerWrite($container, $error);
     }
 
     private function excludeNestedResults(ResultInterface $result): void
@@ -172,10 +178,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 ->getContainer($containerUuid ?? throw new ActiveContainerNotFoundException())
                 ->addSetUps($fixture);
             $this->startFixture($fixture);
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Fixture (setUp, UUID: {uuid}) not started', $e, ['uuid' => $containerUuid]);
+            $error = $e;
         }
-        $this->notifier->afterFixtureStart($fixture);
+        $this->notifier->afterFixtureStart($fixture, $error);
     }
 
     public function startTearDownFixture(FixtureResult $fixture, ?string $containerUuid = null): void
@@ -188,10 +196,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 ->getContainer($containerUuid ?? throw new ActiveContainerNotFoundException())
                 ->addTearDowns($fixture);
             $this->startFixture($fixture);
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Fixture (tearDown, UUID: {uuid}) not started', $e, ['uuid' => $containerUuid]);
+            $error = $e;
         }
-        $this->notifier->afterFixtureStart($fixture);
+        $this->notifier->afterFixtureStart($fixture, $error);
     }
 
     private function startFixture(FixtureResult $fixture): void
@@ -220,10 +230,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
         $this->notifier->beforeFixtureUpdate($fixture);
         try {
             $update($fixture);
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Fixture (UUID: {uuid}) not updated', $e, ['uuid' => $fixture->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterFixtureUpdate($fixture);
+        $this->notifier->afterFixtureUpdate($fixture, $error);
 
         return $fixture->getUuid();
     }
@@ -245,10 +257,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 ->setStop($this->clock->now());
             $this->storage->unset($fixture->getUuid());
             $this->threadContext->reset();
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Fixture (UUID: {uuid}) not stopped', $e, ['uuid' => $fixture->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterFixtureStop($fixture);
+        $this->notifier->afterFixtureStop($fixture, $error);
 
         return $fixture->getUuid();
     }
@@ -282,14 +296,16 @@ final class AllureLifecycle implements AllureLifecycleInterface
             $this->storage->set(
                 $test->setStage(Stage::scheduled()),
             );
+            $error = null;
         } catch (Throwable $e) {
             $this->logException(
                 'Test (UUID: {uuid}) not scheduled (container UUID: {containerUuid})',
                 $e,
                 ['uuid' => $test->getUuid(), 'containerUuid' => $containerUuid],
             );
+            $error = $e;
         }
-        $this->notifier->afterTestSchedule($test);
+        $this->notifier->afterTestSchedule($test, $error);
     }
 
     public function startTest(string $uuid): void
@@ -310,10 +326,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 ->threadContext
                 ->reset()
                 ->push($test->getUuid());
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Test (UUID: {uuid}) not started', $e, ['uuid' => $test->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterTestStart($test);
+        $this->notifier->afterTestStart($test, $error);
     }
 
     public function updateTest(callable $update, ?string $uuid = null): ?string
@@ -329,10 +347,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
         $this->notifier->beforeTestUpdate($test);
         try {
             $update($test);
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Test (UUID: {uuid}) not updated', $e, ['uuid' => $test->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterTestUpdate($test);
+        $this->notifier->afterTestUpdate($test, $error);
 
         return $test->getUuid();
     }
@@ -353,10 +373,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 ->setStage(Stage::finished())
                 ->setStop($this->clock->now());
             $this->threadContext->reset();
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Test (UUID: {uuid}) not stopped', $e, ['uuid' => $test->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterTestStop($test);
+        $this->notifier->afterTestStop($test, $error);
 
         return $test->getUuid();
     }
@@ -380,10 +402,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 $this->resultsWriter->writeTest($test);
             }
             $this->storage->unset($test->getUuid());
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Test (UUID: {uuid}) not written', $e, ['uuid' => $test->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterTestWrite($test);
+        $this->notifier->afterTestWrite($test, $error);
     }
 
     private function removeTest(TestResult $test): void
@@ -412,14 +436,16 @@ final class AllureLifecycle implements AllureLifecycleInterface
                         ->setStart($this->clock->now()),
                 );
             $this->threadContext->push($step->getUuid());
+            $error = null;
         } catch (Throwable $e) {
             $this->logException(
                 'Step (UUID: {uuid}) not started (parent UUID: {parentUuid})',
                 $e,
                 ['uuid' => $step->getUuid(), 'parentUuid' => $parentUuid],
             );
+            $error = $e;
         }
-        $this->notifier->afterStepStart($step);
+        $this->notifier->afterStepStart($step, $error);
     }
 
     public function updateStep(callable $update, ?string $uuid = null): ?string
@@ -435,10 +461,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
         $this->notifier->beforeStepUpdate($step);
         try {
             $update($step);
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Step (UUID: {uuid}) not updated', $e, ['uuid' => $step->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterStepUpdate($step);
+        $this->notifier->afterStepUpdate($step, $error);
 
         return $step->getUuid();
     }
@@ -491,10 +519,12 @@ final class AllureLifecycle implements AllureLifecycleInterface
                 ->setStop($this->clock->now());
             $this->storage->unset($step->getUuid());
             $this->threadContext->pop();
+            $error = null;
         } catch (Throwable $e) {
             $this->logException('Step (UUID: {uuid}) not stopped', $e, ['uuid' => $step->getUuid()]);
+            $error = $e;
         }
-        $this->notifier->afterStepStop($step);
+        $this->notifier->afterStepStop($step, $error);
 
         return $step->getUuid();
     }
@@ -521,14 +551,16 @@ final class AllureLifecycle implements AllureLifecycleInterface
             if (!$attachment->getExcluded()) {
                 $this->resultsWriter->writeAttachment($attachment, $data);
             }
+            $error = null;
         } catch (Throwable $e) {
             $this->logException(
                 'Attachment (UUID: {uuid}) not added (parent UUID: {parentUuid})',
                 $e,
                 ['uuid' => $attachment->getUuid(), 'parentUuid' => $context->getUuid()],
             );
+            $error = $e;
         }
-        $this->notifier->afterAttachmentWrite($attachment);
+        $this->notifier->afterAttachmentWrite($attachment, $error);
     }
 
     private function removeAttachment(AttachmentResult $attachment): void

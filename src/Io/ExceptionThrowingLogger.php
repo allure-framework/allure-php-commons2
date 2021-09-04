@@ -57,7 +57,7 @@ final class ExceptionThrowingLogger implements LoggerInterface
     {
         $this->delegate->log($level, $message, $context);
         if ($this->shouldThrowException($level)) {
-            throw new RuntimeException($message);
+            throw new RuntimeException(is_string($message) ? $message : (string) $message);
         }
     }
 
