@@ -72,6 +72,11 @@ final class ThreadContext implements ThreadContextInterface
             : null;
     }
 
+    public function getCurrentTestOrStep(): ?string
+    {
+        return $this->getCurrentStep() ?? $this->getCurrentTest();
+    }
+
     public function resetContainer(): ThreadContextInterface
     {
         unset($this->containersByThread[$this->thread]);

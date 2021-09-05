@@ -28,17 +28,15 @@ final class AllureLifecycle implements AllureLifecycleInterface
 {
     use LoggerAwareTrait;
 
-    private ThreadContextInterface $threadContext;
-
     public function __construct(
         LoggerInterface $logger,
         private ClockInterface $clock,
         private ResultsWriterInterface $resultsWriter,
         private HooksNotifierInterface $notifier,
         private ResultStorageInterface $storage,
+        private ThreadContextInterface $threadContext,
     ) {
         $this->logger = $logger;
-        $this->threadContext = new ThreadContext();
     }
 
     public function switchThread(?string $thread): void
@@ -125,11 +123,10 @@ final class AllureLifecycle implements AllureLifecycleInterface
         }
         $this->notifier->beforeContainerWrite($container);
         try {
-            $nestedResults = $container->getNestedResults();
             if ($container->getExcluded()) {
                 $this->excludeNestedResults($container);
             }
-            $this->removeExcludedNestedResults(...$nestedResults);
+            $this->removeExcludedNestedResults($container);
             if (!$container->getExcluded()) {
                 $this->resultsWriter->writeContainer($container);
             }
@@ -159,8 +156,6 @@ final class AllureLifecycle implements AllureLifecycleInterface
                     $this->removeAttachment($nestedResult);
                 } elseif ($nestedResult instanceof TestResult) {
                     $this->removeTest($nestedResult);
-                } else {
-                    $this->logger->error('Result not removed', ['class' => $nestedResult::class]);
                 }
             }
         }
@@ -178,7 +173,11 @@ final class AllureLifecycle implements AllureLifecycleInterface
             $this->startFixture($fixture);
             $error = null;
         } catch (Throwable $e) {
-            $this->logException('Fixture (setUp, UUID: {uuid}) not started', $e, ['uuid' => $containerUuid]);
+            $this->logException(
+                'Set up fixture (UUID: {uuid}, container UUID: {containerUuid}) not started',
+                $e,
+                ['uuid' => $fixture->getUuid(), 'containerUuid' => $containerUuid],
+            );
             $error = $e;
         }
         $this->notifier->afterFixtureStart($fixture, $error);
@@ -196,7 +195,11 @@ final class AllureLifecycle implements AllureLifecycleInterface
             $this->startFixture($fixture);
             $error = null;
         } catch (Throwable $e) {
-            $this->logException('Fixture (tearDown, UUID: {uuid}) not started', $e, ['uuid' => $containerUuid]);
+            $this->logException(
+                'Tear down fixture (UUID: {uuid}, container UUID: {containerUuid}) not started',
+                $e,
+                ['uuid' => $fixture->getUuid(), 'containerUuid' => $containerUuid],
+            );
             $error = $e;
         }
         $this->notifier->afterFixtureStart($fixture, $error);
@@ -277,7 +280,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
 
     public function getCurrentTestOrStep(): ?string
     {
-        return $this->getCurrentStep() ?? $this->getCurrentTest();
+        return $this->threadContext->getCurrentTestOrStep();
     }
 
     public function scheduleTest(TestResult $test, ?string $containerUuid = null): void
