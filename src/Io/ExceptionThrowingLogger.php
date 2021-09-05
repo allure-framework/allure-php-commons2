@@ -67,6 +67,8 @@ final class ExceptionThrowingLogger implements LoggerInterface
         $this->delegate->log($level, $message, $context);
         if ($this->shouldThrowException($level)) {
             /**
+             * Workaround to deal with different signatures in PSR-3 versions.
+             *
              * @psalm-suppress RedundantConditionGivenDocblockType
              * @psalm-suppress DocblockTypeContradiction
              */
