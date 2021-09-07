@@ -38,6 +38,7 @@ use Qameta\Allure\Hook\BeforeTestStopHookInterface;
 use Qameta\Allure\Hook\BeforeTestUpdateHookInterface;
 use Qameta\Allure\Hook\BeforeTestWriteHookInterface;
 use Qameta\Allure\Hook\LifecycleHookInterface;
+use Qameta\Allure\Hook\OnLifecycleErrorHookInterface;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
 use Qameta\Allure\Model\FixtureResult;
@@ -74,12 +75,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterContainerStart(ContainerResult $container, ?Throwable $error): void
+    public function afterContainerStart(ContainerResult $container): void
     {
         $this->forEachHook(
             $container->getResultType(),
             AfterContainerStartHookInterface::class,
-            static fn (AfterContainerStartHookInterface $hook) => $hook->afterContainerStart($container, $error),
+            static fn (AfterContainerStartHookInterface $hook) => $hook->afterContainerStart($container),
         );
     }
 
@@ -92,12 +93,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterContainerUpdate(ContainerResult $container, ?Throwable $error): void
+    public function afterContainerUpdate(ContainerResult $container): void
     {
         $this->forEachHook(
             $container->getResultType(),
             AfterContainerUpdateHookInterface::class,
-            static fn (AfterContainerUpdateHookInterface $hook) => $hook->afterContainerUpdate($container, $error),
+            static fn (AfterContainerUpdateHookInterface $hook) => $hook->afterContainerUpdate($container),
         );
     }
 
@@ -110,12 +111,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterContainerStop(ContainerResult $container, ?Throwable $error): void
+    public function afterContainerStop(ContainerResult $container): void
     {
         $this->forEachHook(
             $container->getResultType(),
             AfterContainerStopHookInterface::class,
-            static fn (AfterContainerStopHookInterface $hook) => $hook->afterContainerStop($container, $error),
+            static fn (AfterContainerStopHookInterface $hook) => $hook->afterContainerStop($container),
         );
     }
 
@@ -128,12 +129,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterContainerWrite(ContainerResult $container, ?Throwable $error): void
+    public function afterContainerWrite(ContainerResult $container): void
     {
         $this->forEachHook(
             $container->getResultType(),
             AfterContainerWriteHookInterface::class,
-            static fn (AfterContainerWriteHookInterface $hook) => $hook->afterContainerWrite($container, $error),
+            static fn (AfterContainerWriteHookInterface $hook) => $hook->afterContainerWrite($container),
         );
     }
 
@@ -146,12 +147,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterFixtureStart(FixtureResult $fixture, ?Throwable $error): void
+    public function afterFixtureStart(FixtureResult $fixture): void
     {
         $this->forEachHook(
             $fixture->getResultType(),
             AfterFixtureStartHookInterface::class,
-            static fn (AfterFixtureStartHookInterface $hook) => $hook->afterFixtureStart($fixture, $error),
+            static fn (AfterFixtureStartHookInterface $hook) => $hook->afterFixtureStart($fixture),
         );
     }
 
@@ -164,12 +165,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterFixtureUpdate(FixtureResult $fixture, ?Throwable $error): void
+    public function afterFixtureUpdate(FixtureResult $fixture): void
     {
         $this->forEachHook(
             $fixture->getResultType(),
             AfterFixtureUpdateHookInterface::class,
-            static fn (AfterFixtureUpdateHookInterface $hook) => $hook->afterFixtureUpdate($fixture, $error),
+            static fn (AfterFixtureUpdateHookInterface $hook) => $hook->afterFixtureUpdate($fixture),
         );
     }
 
@@ -182,12 +183,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterFixtureStop(FixtureResult $fixture, ?Throwable $error): void
+    public function afterFixtureStop(FixtureResult $fixture): void
     {
         $this->forEachHook(
             $fixture->getResultType(),
             AfterFixtureStopHookInterface::class,
-            static fn (AfterFixtureStopHookInterface $hook) => $hook->afterFixtureStop($fixture, $error),
+            static fn (AfterFixtureStopHookInterface $hook) => $hook->afterFixtureStop($fixture),
         );
     }
 
@@ -200,12 +201,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterTestSchedule(TestResult $test, ?Throwable $error): void
+    public function afterTestSchedule(TestResult $test): void
     {
         $this->forEachHook(
             $test->getResultType(),
             AfterTestScheduleHookInterface::class,
-            static fn (AfterTestScheduleHookInterface $hook) => $hook->afterTestSchedule($test, $error),
+            static fn (AfterTestScheduleHookInterface $hook) => $hook->afterTestSchedule($test),
         );
     }
 
@@ -218,12 +219,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterTestStart(TestResult $test, ?Throwable $error): void
+    public function afterTestStart(TestResult $test): void
     {
         $this->forEachHook(
             $test->getResultType(),
             AfterTestStartHookInterface::class,
-            static fn (AfterTestStartHookInterface $hook) => $hook->afterTestStart($test, $error),
+            static fn (AfterTestStartHookInterface $hook) => $hook->afterTestStart($test),
         );
     }
 
@@ -236,12 +237,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterTestUpdate(TestResult $test, ?Throwable $error): void
+    public function afterTestUpdate(TestResult $test): void
     {
         $this->forEachHook(
             $test->getResultType(),
             AfterTestUpdateHookInterface::class,
-            static fn (AfterTestUpdateHookInterface $hook) => $hook->afterTestUpdate($test, $error),
+            static fn (AfterTestUpdateHookInterface $hook) => $hook->afterTestUpdate($test),
         );
     }
 
@@ -254,12 +255,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterTestStop(TestResult $test, ?Throwable $error): void
+    public function afterTestStop(TestResult $test): void
     {
         $this->forEachHook(
             $test->getResultType(),
             AfterTestStopHookInterface::class,
-            static fn (AfterTestStopHookInterface $hook) => $hook->afterTestStop($test, $error),
+            static fn (AfterTestStopHookInterface $hook) => $hook->afterTestStop($test),
         );
     }
 
@@ -272,12 +273,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterTestWrite(TestResult $test, ?Throwable $error): void
+    public function afterTestWrite(TestResult $test): void
     {
         $this->forEachHook(
             $test->getResultType(),
             AfterTestWriteHookInterface::class,
-            static fn (AfterTestWriteHookInterface $hook) => $hook->afterTestWrite($test, $error),
+            static fn (AfterTestWriteHookInterface $hook) => $hook->afterTestWrite($test),
         );
     }
 
@@ -290,12 +291,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterStepStart(StepResult $step, ?Throwable $error): void
+    public function afterStepStart(StepResult $step): void
     {
         $this->forEachHook(
             $step->getResultType(),
             AfterStepStartHookInterface::class,
-            static fn (AfterStepStartHookInterface $hook) => $hook->afterStepStart($step, $error),
+            static fn (AfterStepStartHookInterface $hook) => $hook->afterStepStart($step),
         );
     }
 
@@ -308,12 +309,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterStepUpdate(StepResult $step, ?Throwable $error): void
+    public function afterStepUpdate(StepResult $step): void
     {
         $this->forEachHook(
             $step->getResultType(),
             AfterStepUpdateHookInterface::class,
-            static fn (AfterStepUpdateHookInterface $hook) => $hook->afterStepUpdate($step, $error),
+            static fn (AfterStepUpdateHookInterface $hook) => $hook->afterStepUpdate($step),
         );
     }
 
@@ -326,12 +327,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterStepStop(StepResult $step, ?Throwable $error): void
+    public function afterStepStop(StepResult $step): void
     {
         $this->forEachHook(
             $step->getResultType(),
             AfterStepStopHookInterface::class,
-            static fn (AfterStepStopHookInterface $hook) => $hook->afterStepStop($step, $error),
+            static fn (AfterStepStopHookInterface $hook) => $hook->afterStepStop($step),
         );
     }
 
@@ -344,12 +345,21 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterAttachmentWrite(AttachmentResult $attachment, ?Throwable $error): void
+    public function afterAttachmentWrite(AttachmentResult $attachment): void
     {
         $this->forEachHook(
             $attachment->getResultType(),
             AfterAttachmentWriteHookInterface::class,
-            static fn (AfterAttachmentWriteHookInterface $hook) => $hook->afterAttachmentWrite($attachment, $error),
+            static fn (AfterAttachmentWriteHookInterface $hook) => $hook->afterAttachmentWrite($attachment),
+        );
+    }
+
+    public function onLifecycleError(Throwable $error): void
+    {
+        $this->forEachHook(
+            ResultType::unknown(),
+            OnLifecycleErrorHookInterface::class,
+            static fn (OnLifecycleErrorHookInterface $hook) => $hook->onLifecycleError($error),
         );
     }
 

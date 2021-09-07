@@ -16,6 +16,12 @@ interface AllureLifecycleInterface
 
     public function switchThread(?string $thread): void;
 
+    public function getCurrentTest(): ?string;
+
+    public function getCurrentStep(): ?string;
+
+    public function getCurrentTestOrStep(): ?string;
+
     public function startContainer(ContainerResult $container): void;
 
     public function updateContainer(callable $update, ?string $uuid = null): ?string;
@@ -31,12 +37,6 @@ interface AllureLifecycleInterface
     public function updateFixture(callable $update, ?string $uuid = null): ?string;
 
     public function stopFixture(?string $uuid = null): ?string;
-
-    public function getCurrentTest(): ?string;
-
-    public function getCurrentStep(): ?string;
-
-    public function getCurrentTestOrStep(): ?string;
 
     public function scheduleTest(TestResult $test, ?string $containerUuid = null): void;
 
