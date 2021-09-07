@@ -25,6 +25,7 @@ class SystemClockTest extends TestCase
         $firstValue = floatval($clock->now()->format('U.u')) - $timeBase;
         usleep(200000); // sleep for 0.2 s
         $secondValue = floatval($clock->now()->format('U.u')) - $timeBase;
-        self::assertGreaterThanOrEqual(0.2, $secondValue - $firstValue);
+        // Difference should be longer than at least half of the sleep time
+        self::assertGreaterThanOrEqual(0.1, $secondValue - $firstValue);
     }
 }
