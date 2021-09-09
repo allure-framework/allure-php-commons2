@@ -34,7 +34,6 @@ use ReflectionFunction;
 use ReflectionMethod;
 use Throwable;
 
-use function count;
 use function is_array;
 
 final class Allure
@@ -97,14 +96,16 @@ final class Allure
 
     /**
      * Runs provided callable as step with given name, if any, or default name that can be modified
-     * using {@see setDefaultStepName()} method. On success returns callable result, or null on failure.
+     * using {@see setDefaultStepName()} method. On success returns callable result, or throws exception on failure.
      *
      * @param callable(StepContextInterface):mixed $callable
+     * @param string|null                          $name
      * @return mixed
+     * @throws Throwable
      */
-    public static function runStep(callable $callable): mixed
+    public static function runStep(callable $callable, ?string $name = null): mixed
     {
-        return self::getInstance()->doRunStep($callable);
+        return self::getInstance()->doRunStep($callable, $name);
     }
 
     public static function attachment(
@@ -365,9 +366,11 @@ final class Allure
 
     /**
      * @param callable(StepContextInterface):mixed $callable
+     * @param string|null                          $name
      * @return mixed
+     * @throws Throwable
      */
-    private function doRunStep(callable $callable): mixed
+    private function doRunStep(callable $callable, ?string $name = null): mixed
     {
         $step = $this
             ->getLifecycleConfig()
@@ -377,30 +380,30 @@ final class Allure
         try {
             $parser = $this->readCallableAttributes($callable);
             $this->doGetLifecycle()->updateStep(
-                fn (StepResult $step) => $step
-                    ->setName($parser->getTitle() ?? $this->defaultStepName)
+                fn (StepResult $s): StepResult => $s
+                    ->setName($name ?? $parser->getTitle() ?? $this->defaultStepName)
                     ->addParameters(...$parser->getParameters()),
+                $step->getUuid(),
             );
 
             /** @var mixed $result */
             $result = $callable(new StepContext($this->doGetLifecycle(), $step->getUuid()));
             $this->doGetLifecycle()->updateStep(
-                fn (StepResult $step) => $step->setStatus(Status::passed()),
+                fn (StepResult $s): StepResult => $s->setStatus(Status::passed()),
                 $step->getUuid(),
             );
         } catch (Throwable $e) {
             $statusDetector = $this->getLifecycleConfig()->getStatusDetector();
             $this->doGetLifecycle()->updateStep(
-                fn (StepResult $step) => $step
+                fn (StepResult $s): StepResult => $s
                     ->setStatus($statusDetector->getStatus($e))
                     ->setStatusDetails($statusDetector->getStatusDetails($e)),
                 $step->getUuid(),
             );
-            $this->doGetLifecycle()->stopStep($step->getUuid());
-
             throw $e;
+        } finally {
+            $this->doGetLifecycle()->stopStep($step->getUuid());
         }
-        $this->doGetLifecycle()->stopStep($step->getUuid());
 
         return $result;
     }
@@ -412,12 +415,8 @@ final class Allure
     {
         $attributeReader = new AttributeReader();
         if (is_array($callable)) {
-            [$object, $method] = count($callable) == 2
-                ? $callable
-                : [null, null];
-            $attributes = isset($object, $method)
-                ? $attributeReader->getMethodAnnotations(new ReflectionMethod($object, $method))
-                : [];
+            [$object, $method] = $callable;
+            $attributes = $attributeReader->getMethodAnnotations(new ReflectionMethod($object, $method));
         } else {
             /** @var Closure|callable-string $callable */
             $attributes = $attributeReader->getFunctionAnnotations(new ReflectionFunction($callable));
