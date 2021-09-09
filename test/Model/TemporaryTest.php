@@ -59,7 +59,7 @@ class TemporaryTest extends TestCase
             ->createFixture()
             ->setName('Setup fixture')
             ->setStatus(Status::failed());
-        $lifecycle->startSetUpFixture($setupFixture, $container->getUuid());
+        $lifecycle->startBeforeFixture($setupFixture, $container->getUuid());
         $lifecycle->stopFixture($setupFixture->getUuid());
         $test = $resultFactory
             ->createTest()

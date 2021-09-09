@@ -7,6 +7,7 @@ use Qameta\Allure\Exception\ActiveContainerNotFoundException;
 use Qameta\Allure\Exception\ActiveExecutionContextNotFoundException;
 use Qameta\Allure\Exception\ActiveStepNotFoundException;
 use Qameta\Allure\Exception\ActiveTestNotFoundException;
+use Qameta\Allure\Exception\InvalidExecutionContextException;
 use Qameta\Allure\Internal\ThreadContextInterface;
 use Qameta\Allure\Internal\HooksNotifierInterface;
 use Qameta\Allure\Internal\LoggerAwareTrait;
@@ -16,6 +17,7 @@ use Qameta\Allure\Io\DataSourceInterface;
 use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
+use Qameta\Allure\Model\ExecutionContextInterface;
 use Qameta\Allure\Model\FixtureResult;
 use Qameta\Allure\Model\ResultInterface;
 use Qameta\Allure\Model\Stage;
@@ -174,7 +176,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
         }
     }
 
-    public function startSetUpFixture(FixtureResult $fixture, ?string $containerUuid = null): void
+    public function startBeforeFixture(FixtureResult $fixture, ?string $containerUuid = null): void
     {
         $this->notifier->beforeFixtureStart($fixture);
         try {
@@ -182,7 +184,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
             $this
                 ->storage
                 ->getContainer($containerUuid ?? throw new ActiveContainerNotFoundException())
-                ->addSetUps($fixture);
+                ->addBefores($fixture);
             $this->startFixture($fixture);
         } catch (Throwable $e) {
             $this->logException(
@@ -195,7 +197,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
         $this->notifier->afterFixtureStart($fixture);
     }
 
-    public function startTearDownFixture(FixtureResult $fixture, ?string $containerUuid = null): void
+    public function startAfterFixture(FixtureResult $fixture, ?string $containerUuid = null): void
     {
         $this->notifier->beforeFixtureStart($fixture);
         try {
@@ -203,7 +205,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
             $this
                 ->storage
                 ->getContainer($containerUuid ?? throw new ActiveContainerNotFoundException())
-                ->addTearDowns($fixture);
+                ->addAfters($fixture);
             $this->startFixture($fixture);
         } catch (Throwable $e) {
             $this->logException(
@@ -472,7 +474,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
         try {
             $uuid ??= $this->threadContext->getCurrentTestOrStep();
             $context = $this->storage->getExecutionContext(
-                $uuid ?? throw new ActiveExecutionContextNotFoundException()
+                $uuid ?? throw new ActiveExecutionContextNotFoundException(),
             );
         } catch (Throwable $e) {
             $this->logException('Execution context (UUID: {uuid}) not updated', $e, ['uuid' => $uuid]);
@@ -481,20 +483,21 @@ final class AllureLifecycle implements AllureLifecycleInterface
             return null;
         }
 
-        if ($context instanceof FixtureResult) {
-            return $this->updateFixture($update, $context->getUuid());
-        }
-        if ($context instanceof TestResult) {
-            return $this->updateTest($update, $context->getUuid());
-        }
-        if ($context instanceof StepResult) {
-            return $this->updateStep($update, $context->getUuid());
-        }
+        return match (true) {
+            $context instanceof FixtureResult => $this->updateFixture($update, $context->getUuid()),
+            $context instanceof TestResult => $this->updateTest($update, $context->getUuid()),
+            $context instanceof StepResult => $this->updateStep($update, $context->getUuid()),
+            default => $this->reportInvalidContext($context),
+        };
+    }
 
+    private function reportInvalidContext(ExecutionContextInterface $context): ?string
+    {
         $this->logger->error(
             'Execution context (UUID: {uuid}) not updated',
             ['uuid' => $context->getUuid()],
         );
+        $this->notifier->onLifecycleError(new InvalidExecutionContextException($context));
 
         return null;
     }

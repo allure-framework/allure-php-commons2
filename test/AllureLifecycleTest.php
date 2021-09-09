@@ -13,11 +13,13 @@ use Qameta\Allure\Exception\ActiveContainerNotFoundException;
 use Qameta\Allure\Exception\ActiveExecutionContextNotFoundException;
 use Qameta\Allure\Exception\ActiveStepNotFoundException;
 use Qameta\Allure\Exception\ActiveTestNotFoundException;
+use Qameta\Allure\Exception\InvalidExecutionContextException;
 use Qameta\Allure\Internal\HooksNotifierInterface;
 use Qameta\Allure\Internal\ResultStorageInterface;
 use Qameta\Allure\Internal\ThreadContext;
 use Qameta\Allure\Internal\ThreadContextInterface;
 use Qameta\Allure\Io\ClockInterface;
+use Qameta\Allure\Io\DataSourceInterface;
 use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
@@ -837,7 +839,7 @@ class AllureLifecycleTest extends TestCase
         $setUpStepAttachment = new AttachmentResult('e');
         $setUpStep->addAttachments($setUpStepAttachment);
         $setUp->addSteps($setUpStep);
-        $container->addSetUps($setUp);
+        $container->addBefores($setUp);
 
         $test = new TestResult('f');
         $testAttachment = new AttachmentResult('g');
@@ -855,7 +857,7 @@ class AllureLifecycleTest extends TestCase
         $tearDownStepAttachment = new AttachmentResult('m');
         $tearDownStep->addAttachments($tearDownStepAttachment);
         $tearDown->addSteps($tearDownStep);
-        $container->addTearDowns($tearDown);
+        $container->addAfters($tearDown);
 
         $lifecycle = new AllureLifecycle(
             $this->createStub(LoggerInterface::class),
@@ -997,7 +999,7 @@ class AllureLifecycleTest extends TestCase
         $lifecycle->writeContainer('a');
     }
 
-    public function testStartSetUpFixture_ExceptionNotThrownDuringStart_NeverLogsError(): void
+    public function testStartBeforeFixture_ExceptionNotThrownDuringStart_NeverLogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $container = new ContainerResult('a');
@@ -1012,10 +1014,10 @@ class AllureLifecycleTest extends TestCase
         $logger
             ->expects(self::never())
             ->method('error');
-        $lifecycle->startSetUpFixture(new FixtureResult('b'), 'a');
+        $lifecycle->startBeforeFixture(new FixtureResult('b'), 'a');
     }
 
-    public function testStartSetUpFixture_ContainerNeitherGivenNorStarted_LogsError(): void
+    public function testStartBeforeFixture_ContainerNeitherGivenNorStarted_LogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $lifecycle = new AllureLifecycle(
@@ -1037,10 +1039,10 @@ class AllureLifecycleTest extends TestCase
                     ['uuid' => 'b', 'containerUuid' => null, 'exception' => new ActiveContainerNotFoundException()],
                 ),
             );
-        $lifecycle->startSetUpFixture(new FixtureResult('b'));
+        $lifecycle->startBeforeFixture(new FixtureResult('b'));
     }
 
-    public function testStartSetUpFixture_ExceptionThrownAfterContainerIsProvided_LogsError(): void
+    public function testStartBeforeFixture_ExceptionThrownAfterContainerIsProvided_LogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $error = new Exception();
@@ -1063,10 +1065,10 @@ class AllureLifecycleTest extends TestCase
                     ['uuid' => 'b', 'containerUuid' => 'a', 'exception' => $error],
                 ),
             );
-        $lifecycle->startSetUpFixture(new FixtureResult('b'), 'a');
+        $lifecycle->startBeforeFixture(new FixtureResult('b'), 'a');
     }
 
-    public function testStartSetUpFixture_ContainerNotGivenButStarted_NeverLogsError(): void
+    public function testStartBeforeFixture_ContainerNotGivenButStarted_NeverLogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $container = new ContainerResult('a');
@@ -1082,10 +1084,10 @@ class AllureLifecycleTest extends TestCase
         $logger
             ->expects(self::never())
             ->method('error');
-        $lifecycle->startSetUpFixture(new FixtureResult('b'));
+        $lifecycle->startBeforeFixture(new FixtureResult('b'));
     }
 
-    public function testStartSetUpFixture_ContainerGiven_NeverLogsError(): void
+    public function testStartBeforeFixture_ContainerGiven_NeverLogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $lifecycle = new AllureLifecycle(
@@ -1100,10 +1102,10 @@ class AllureLifecycleTest extends TestCase
         $logger
             ->expects(self::never())
             ->method('error');
-        $lifecycle->startSetUpFixture(new FixtureResult('b'), 'a');
+        $lifecycle->startBeforeFixture(new FixtureResult('b'), 'a');
     }
 
-    public function testStartSetUpFixture_GivenFixture_ContainerContainsSameFixture(): void
+    public function testStartBeforeFixture_GivenFixture_ContainerContainsSameFixture(): void
     {
         $container = new ContainerResult('a');
         $lifecycle = new AllureLifecycle(
@@ -1116,11 +1118,11 @@ class AllureLifecycleTest extends TestCase
         );
 
         $fixture = new FixtureResult('b');
-        $lifecycle->startSetUpFixture($fixture, 'a');
-        self::assertSame([$fixture], $container->getSetUps());
+        $lifecycle->startBeforeFixture($fixture, 'a');
+        self::assertSame([$fixture], $container->getBefores());
     }
 
-    public function testStartSetUpFixture_ClockProvidesGivenTime_FixtureStartIsSameTime(): void
+    public function testStartBeforeFixture_ClockProvidesGivenTime_FixtureStartIsSameTime(): void
     {
         $time = new DateTimeImmutable('@0');
         $lifecycle = new AllureLifecycle(
@@ -1133,11 +1135,11 @@ class AllureLifecycleTest extends TestCase
         );
 
         $fixture = new FixtureResult('b');
-        $lifecycle->startSetUpFixture($fixture, 'a');
+        $lifecycle->startBeforeFixture($fixture, 'a');
         self::assertSame($time, $fixture->getStart());
     }
 
-    public function testStartSetUpFixture_GivenFixture_FixtureOnRunningStage(): void
+    public function testStartBeforeFixture_GivenFixture_FixtureOnRunningStage(): void
     {
         $lifecycle = new AllureLifecycle(
             $this->createStub(LoggerInterface::class),
@@ -1149,11 +1151,11 @@ class AllureLifecycleTest extends TestCase
         );
 
         $fixture = new FixtureResult('b');
-        $lifecycle->startSetUpFixture($fixture, 'a');
+        $lifecycle->startBeforeFixture($fixture, 'a');
         self::assertSame(Stage::running(), $fixture->getStage());
     }
 
-    public function testStartSetUpFixture_ThreadContextWithNonEmptyStack_OnlyFixtureInContextStack(): void
+    public function testStartBeforeFixture_ThreadContextWithNonEmptyStack_OnlyFixtureInContextStack(): void
     {
         $threadContext = new ThreadContext();
         $lifecycle = new AllureLifecycle(
@@ -1168,11 +1170,11 @@ class AllureLifecycleTest extends TestCase
         $fixture = new FixtureResult('b');
         $threadContext->push('c');
         $threadContext->push('d');
-        $lifecycle->startSetUpFixture($fixture, 'a');
+        $lifecycle->startBeforeFixture($fixture, 'a');
         self::assertSame(['b'], $this->extractThreadStack($threadContext));
     }
 
-    public function testStartTearDownFixture_ExceptionNotThrownDuringStart_NeverLogsError(): void
+    public function testStartAfterFixture_ExceptionNotThrownDuringStart_NeverLogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $container = new ContainerResult('a');
@@ -1187,10 +1189,10 @@ class AllureLifecycleTest extends TestCase
         $logger
             ->expects(self::never())
             ->method('error');
-        $lifecycle->startTearDownFixture(new FixtureResult('b'), 'a');
+        $lifecycle->startAfterFixture(new FixtureResult('b'), 'a');
     }
 
-    public function testStartTearDownFixture_ContainerNeitherGivenNorStarted_LogsError(): void
+    public function testStartAfterFixture_ContainerNeitherGivenNorStarted_LogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $lifecycle = new AllureLifecycle(
@@ -1212,10 +1214,10 @@ class AllureLifecycleTest extends TestCase
                     ['uuid' => 'a', 'containerUuid' => null, 'exception' => new ActiveContainerNotFoundException()],
                 ),
             );
-        $lifecycle->startTearDownFixture(new FixtureResult('a'));
+        $lifecycle->startAfterFixture(new FixtureResult('a'));
     }
 
-    public function testStartTearDownFixture_ExceptionThrownAfterContainerIsProvided_LogsError(): void
+    public function testStartAfterFixture_ExceptionThrownAfterContainerIsProvided_LogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $error = new Exception();
@@ -1238,10 +1240,10 @@ class AllureLifecycleTest extends TestCase
                     ['uuid' => 'b', 'containerUuid' => 'a', 'exception' => $error],
                 ),
             );
-        $lifecycle->startTearDownFixture(new FixtureResult('b'), 'a');
+        $lifecycle->startAfterFixture(new FixtureResult('b'), 'a');
     }
 
-    public function testStartTearDownFixture_ContainerNotGivenButStarted_NeverLogsError(): void
+    public function testStartAfterFixture_ContainerNotGivenButStarted_NeverLogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $container = new ContainerResult('a');
@@ -1257,10 +1259,10 @@ class AllureLifecycleTest extends TestCase
         $logger
             ->expects(self::never())
             ->method('error');
-        $lifecycle->startTearDownFixture(new FixtureResult('b'));
+        $lifecycle->startAfterFixture(new FixtureResult('b'));
     }
 
-    public function testStartTearDownFixture_ContainerGiven_NeverLogsError(): void
+    public function testStartAfterFixture_ContainerGiven_NeverLogsError(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $lifecycle = new AllureLifecycle(
@@ -1275,10 +1277,10 @@ class AllureLifecycleTest extends TestCase
         $logger
             ->expects(self::never())
             ->method('error');
-        $lifecycle->startTearDownFixture(new FixtureResult('b'), 'a');
+        $lifecycle->startAfterFixture(new FixtureResult('b'), 'a');
     }
 
-    public function testStartTearDownFixture_GivenFixture_ContainerContainsSameFixture(): void
+    public function testStartAfterFixture_GivenFixture_ContainerContainsSameFixture(): void
     {
         $container = new ContainerResult('a');
         $lifecycle = new AllureLifecycle(
@@ -1291,11 +1293,11 @@ class AllureLifecycleTest extends TestCase
         );
 
         $fixture = new FixtureResult('b');
-        $lifecycle->startTearDownFixture($fixture, 'a');
-        self::assertSame([$fixture], $container->getTearDowns());
+        $lifecycle->startAfterFixture($fixture, 'a');
+        self::assertSame([$fixture], $container->getAfters());
     }
 
-    public function testStartTearDownFixture_ClockProvidesGivenTime_FixtureStartIsSameTime(): void
+    public function testStartAfterFixture_ClockProvidesGivenTime_FixtureStartIsSameTime(): void
     {
         $time = new DateTimeImmutable('@0');
         $lifecycle = new AllureLifecycle(
@@ -1308,11 +1310,11 @@ class AllureLifecycleTest extends TestCase
         );
 
         $fixture = new FixtureResult('b');
-        $lifecycle->startTearDownFixture($fixture, 'a');
+        $lifecycle->startAfterFixture($fixture, 'a');
         self::assertSame($time, $fixture->getStart());
     }
 
-    public function testStartTearDownFixture_GivenFixture_FixtureOnRunningStage(): void
+    public function testStartAfterFixture_GivenFixture_FixtureOnRunningStage(): void
     {
         $lifecycle = new AllureLifecycle(
             $this->createStub(LoggerInterface::class),
@@ -1324,11 +1326,11 @@ class AllureLifecycleTest extends TestCase
         );
 
         $fixture = new FixtureResult('b');
-        $lifecycle->startTearDownFixture($fixture, 'a');
+        $lifecycle->startAfterFixture($fixture, 'a');
         self::assertSame(Stage::running(), $fixture->getStage());
     }
 
-    public function testStartTearDownFixture_ThreadContextWithNonEmptyStack_OnlyFixtureInContextStack(): void
+    public function testStartAfterFixture_ThreadContextWithNonEmptyStack_OnlyFixtureInContextStack(): void
     {
         $threadContext = new ThreadContext();
         $lifecycle = new AllureLifecycle(
@@ -1343,7 +1345,7 @@ class AllureLifecycleTest extends TestCase
         $fixture = new FixtureResult('b');
         $threadContext->push('c');
         $threadContext->push('d');
-        $lifecycle->startTearDownFixture($fixture, 'a');
+        $lifecycle->startAfterFixture($fixture, 'a');
         self::assertSame(['b'], $this->extractThreadStack($threadContext));
     }
 
@@ -1716,7 +1718,7 @@ class AllureLifecycleTest extends TestCase
         self::assertSame($time, $fixture->getStop());
     }
 
-    public function testStopFixture_StorageProvidesFixture_FixtureIsAtFinishedStage(): void
+    public function testStopFixture_StorageProvidesFixture_FixtureOnFinishedStage(): void
     {
         $time = new DateTimeImmutable('@0');
         $fixture = new FixtureResult('a');
@@ -3267,6 +3269,1172 @@ class AllureLifecycleTest extends TestCase
         self::assertSame('b', $step->getName());
     }
 
+    public function testUpdateExecutionContext_ContextNeitherGivenNorStarted_LogsErrorAndReturnsNull(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStub(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Execution context (UUID: {uuid}) not updated'),
+                self::equalTo(['uuid' => null, 'exception' => new ActiveExecutionContextNotFoundException()]),
+            );
+        $lifecycle->updateExecutionContext(fn () => null);
+    }
+
+    public function testUpdateExecutionContext_StorageFailsToProvideGivenContext_LogsErrorAndReturnsNull(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $error = new Exception();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithoutExecutionContext('a', $error),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Execution context (UUID: {uuid}) not updated'),
+                self::equalTo(['uuid' => 'a', 'exception' => $error]),
+            );
+        self::assertNull($lifecycle->updateExecutionContext(fn () => null, 'a'));
+    }
+
+    public function testUpdateExecutionContext_StorageFailsToProvideStartedContext_LogsErrorAndReturnsNull(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $error = new Exception();
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithoutExecutionContext('b', $error),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $threadContext->push('b');
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Execution context (UUID: {uuid}) not updated'),
+                self::equalTo(['uuid' => 'b', 'exception' => $error]),
+            );
+        self::assertNull($lifecycle->updateExecutionContext(fn () => null));
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesInvalidContext_LogsErrorAndReturnsNull(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithInvalidExecutionContext('a'),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Execution context (UUID: {uuid}) not updated'),
+                self::equalTo(['uuid' => 'a']),
+            );
+        self::assertNull($lifecycle->updateExecutionContext(fn () => null, 'a'));
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesGivenTest_NeverLogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithTest(new TestResult('a')),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::never())
+            ->method('error');
+        self::assertSame('a', $lifecycle->updateExecutionContext(fn () => null, 'a'));
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesGivenFixture_NeverLogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithFixture(new FixtureResult('a')),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::never())
+            ->method('error');
+        self::assertSame('a', $lifecycle->updateExecutionContext(fn () => null, 'a'));
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesGivenStep_NeverLogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep(new StepResult('a')),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::never())
+            ->method('error');
+        self::assertSame('a', $lifecycle->updateExecutionContext(fn () => null, 'a'));
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesStartedStep_NeverLogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep(new StepResult('b')),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $threadContext->push('b');
+        $logger
+            ->expects(self::never())
+            ->method('error');
+        self::assertSame('b', $lifecycle->updateExecutionContext(fn () => null));
+    }
+
+    public function testUpdateExecutionContext_ContextNeitherGivenNorStarted_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStub(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::isInstanceOf(ActiveExecutionContextNotFoundException::class));
+        $lifecycle->updateExecutionContext(fn () => null);
+    }
+
+    public function testUpdateExecutionContext_StorageFailsToProvideContext_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $error = new Exception();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithoutExecutionContext('a', $error),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $lifecycle->updateExecutionContext(fn () => null, 'a');
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesInvalidContext_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithInvalidExecutionContext('a'),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::isInstanceOf(InvalidExecutionContextException::class));
+        $lifecycle->updateExecutionContext(fn () => null, 'a');
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesTest_UpdatesSameTest(): void
+    {
+        $test = new TestResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithTest($test),
+            new ThreadContext(),
+        );
+
+        $lifecycle->updateExecutionContext(fn (ExecutionContextInterface $c) => $c->setName('b'), 'a');
+        self::assertSame('b', $test->getName());
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesFixture_UpdatesSameFixture(): void
+    {
+        $fixture = new FixtureResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithFixture($fixture),
+            new ThreadContext(),
+        );
+
+        $lifecycle->updateExecutionContext(fn (ExecutionContextInterface $c) => $c->setName('b'), 'a');
+        self::assertSame('b', $fixture->getName());
+    }
+
+    public function testUpdateExecutionContext_StorageProvidesStep_UpdatesSameStep(): void
+    {
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $lifecycle->updateExecutionContext(fn (ExecutionContextInterface $c) => $c->setName('b'), 'a');
+        self::assertSame('b', $step->getName());
+    }
+
+    public function testUpdateExecutionContext_NoExceptionThrownDuringTestUpdate_NotifiesHooksWithoutError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $test = new TestResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithTest($test),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeTestUpdate')
+            ->with(self::identicalTo($test));
+        $hooksNotifier
+            ->expects(self::never())
+            ->method('onLifecycleError');
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('before')
+            ->method('afterTestUpdate')
+            ->with(self::identicalTo($test));
+        $lifecycle->updateExecutionContext(fn () => null, 'a');
+    }
+
+    public function testUpdateExecutionContext_ExceptionThrownDuringTestUpdate_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $test = new TestResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithTest($test),
+            new ThreadContext(),
+        );
+
+        $error = new Exception();
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeTestUpdate')
+            ->with(self::identicalTo($test));
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('error')
+            ->after('before')
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('error')
+            ->method('afterTestUpdate')
+            ->with(self::identicalTo($test));
+        $lifecycle->updateExecutionContext(fn () => throw $error, 'a');
+    }
+
+    public function testUpdateExecutionContext_NoExceptionThrownDuringFixtureUpdate_NotifiesHooksWithoutError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $fixture = new FixtureResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithFixture($fixture),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeFixtureUpdate')
+            ->with(self::identicalTo($fixture));
+        $hooksNotifier
+            ->expects(self::never())
+            ->method('onLifecycleError');
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('before')
+            ->method('afterFixtureUpdate')
+            ->with(self::identicalTo($fixture));
+        $lifecycle->updateExecutionContext(fn () => null, 'a');
+    }
+
+    public function testUpdateExecutionContext_ExceptionThrownDuringFixtureUpdate_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $fixture = new FixtureResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithFixture($fixture),
+            new ThreadContext(),
+        );
+
+        $error = new Exception();
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeFixtureUpdate')
+            ->with(self::identicalTo($fixture));
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('error')
+            ->after('before')
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('error')
+            ->method('afterFixtureUpdate')
+            ->with(self::identicalTo($fixture));
+        $lifecycle->updateExecutionContext(fn () => throw $error, 'a');
+    }
+
+    public function testUpdateExecutionContext_NoExceptionThrownDuringStepUpdate_NotifiesHooksWithoutError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeStepUpdate')
+            ->with(self::identicalTo($step));
+        $hooksNotifier
+            ->expects(self::never())
+            ->method('onLifecycleError');
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('before')
+            ->method('afterStepUpdate')
+            ->with(self::identicalTo($step));
+        $lifecycle->updateExecutionContext(fn () => null, 'a');
+    }
+
+    public function testUpdateExecutionContext_ExceptionThrownDuringStepUpdate_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $error = new Exception();
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeStepUpdate')
+            ->with(self::identicalTo($step));
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('error')
+            ->after('before')
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('error')
+            ->method('afterStepUpdate')
+            ->with(self::identicalTo($step));
+        $lifecycle->updateExecutionContext(fn () => throw $error, 'a');
+    }
+
+    public function testUpdateExecutionContext_ExceptionThrownDuringTestUpdate_LogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $test = new TestResult('a');
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithTest($test),
+            new ThreadContext(),
+        );
+
+        $error = new Exception();
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Test (UUID: {uuid}) not updated'),
+                self::identicalTo(['uuid' => 'a', 'exception' => $error]),
+            );
+        self::assertSame('a', $lifecycle->updateExecutionContext(fn () => throw $error, 'a'));
+    }
+
+    public function testUpdateExecutionContext_ExceptionThrownDuringFixtureUpdate_LogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $fixture = new FixtureResult('a');
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithFixture($fixture),
+            new ThreadContext(),
+        );
+
+        $error = new Exception();
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Fixture (UUID: {uuid}) not updated'),
+                self::identicalTo(['uuid' => 'a', 'exception' => $error]),
+            );
+        self::assertSame('a', $lifecycle->updateExecutionContext(fn () => throw $error, 'a'));
+    }
+
+    public function testUpdateExecutionContext_ExceptionThrownDuringStepUpdate_LogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $error = new Exception();
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Step (UUID: {uuid}) not updated'),
+                self::identicalTo(['uuid' => 'a', 'exception' => $error]),
+            );
+        self::assertSame('a', $lifecycle->updateExecutionContext(fn () => throw $error, 'a'));
+    }
+
+    public function testStopStep_StepNeitherGivenNorStarted_LogsErrorAndReturnsNull(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStub(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Step (UUID: {uuid}) not stopped'),
+                self::equalTo(['uuid' => null, 'exception' => new ActiveStepNotFoundException()]),
+            );
+        self::assertNull($lifecycle->stopStep());
+    }
+
+    public function testStopStep_StorageFailsToProvideGivenStep_LogsErrorAndReturnsNull(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $error = new Exception();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithoutStep('a', $error),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Step (UUID: {uuid}) not stopped'),
+                self::identicalTo(['uuid' => 'a', 'exception' => $error]),
+            );
+        self::assertNull($lifecycle->stopStep('a'));
+    }
+
+    public function testStopStep_StorageFailsToProvideStartedStep_LogsErrorAndReturnsNull(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $error = new Exception();
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithoutStep('b', $error),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $threadContext->push('b');
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Step (UUID: {uuid}) not stopped'),
+                self::identicalTo(['uuid' => 'b', 'exception' => $error]),
+            );
+        self::assertNull($lifecycle->stopStep());
+    }
+
+    public function testStopStep_StepNeitherGivenNorStarted_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStub(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::isInstanceOf(ActiveStepNotFoundException::class));
+        $lifecycle->stopStep();
+    }
+
+    public function testStopStep_StorageFailsToProvideGivenStep_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $error = new Exception();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithoutStep('a', $error),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $lifecycle->stopStep('a');
+    }
+
+    public function testStopStep_StorageFailsToProvideStartedStep_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $error = new Exception();
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithoutStep('b', $error),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $threadContext->push('b');
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $lifecycle->stopStep();
+    }
+
+    public function testStopStep_StorageProvidesGivenStep_NeverLogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep(new StepResult('a')),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::never())
+            ->method('error');
+        self::assertSame('a', $lifecycle->stopStep('a'));
+    }
+
+    public function testStopStep_StorageProvidesStartedStep_NeverLogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep(new StepResult('b')),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $threadContext->push('b');
+        $logger
+            ->expects(self::never())
+            ->method('error');
+        self::assertSame('b', $lifecycle->stopStep());
+    }
+
+    public function testStopStep_NoExceptionThrownDuringStop_NotifiesHooksWithoutError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeStepStop')
+            ->with(self::identicalTo($step));
+        $hooksNotifier
+            ->expects(self::never())
+            ->method('onLifecycleError');
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('before')
+            ->method('afterStepStop')
+            ->with(self::identicalTo($step));
+        $lifecycle->stopStep('a');
+    }
+
+    public function testStopStep_ExceptionThrownDuringStop_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $error = new Exception();
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createFailingClock($error),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeStepStop')
+            ->with(self::identicalTo($step));
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('error')
+            ->after('before')
+            ->method('onLifecycleError');
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('error')
+            ->method('afterStepStop')
+            ->with(self::identicalTo($step));
+        $lifecycle->stopStep('a');
+    }
+
+    public function testStopStep_ExceptionThrownDuringStop_LogsErrorAndReturnsUuid(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $error = new Exception();
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createFailingClock($error),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Step (UUID: {uuid}) not stopped'),
+                self::identicalTo(['uuid' => 'a', 'exception' => $error]),
+            );
+        self::assertSame('a', $lifecycle->stopStep('a'));
+    }
+
+    public function testStopStep_ClockProvidesTime_StepStopIsSameTime(): void
+    {
+        $time = new DateTimeImmutable('@0');
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock($time),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $lifecycle->stopStep('a');
+        self::assertSame($time, $step->getStop());
+    }
+
+    public function testStopStep_StorageProvidesStep_StepOnFinishedStage(): void
+    {
+        $time = new DateTimeImmutable('@0');
+        $step = new StepResult('a');
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock($time),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep($step),
+            new ThreadContext(),
+        );
+
+        $lifecycle->stopStep('a');
+        self::assertSame($time, $step->getStop());
+    }
+
+    public function testStopStep_StorageProvidesStep_StorageUnsetsSameStep(): void
+    {
+        $resultStorage = $this->createMock(ResultStorageInterface::class);
+        $resultStorage
+            ->method('getStep')
+            ->with(self::identicalTo('a'))
+            ->willReturn(new StepResult('a'));
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $resultStorage,
+            new ThreadContext(),
+        );
+
+        $resultStorage
+            ->expects(self::once())
+            ->method('unset')
+            ->with(self::identicalTo('a'));
+        $lifecycle->stopStep('a');
+    }
+
+    public function testStopStep_ThreadContextWithNonEmptyStack_TopValueIsRemovedFromStack(): void
+    {
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithStep(new StepResult('a')),
+            $threadContext,
+        );
+
+        $threadContext->push('b');
+        $threadContext->push('c');
+        $lifecycle->stopStep('a');
+        self::assertSame(['b'], $this->extractThreadStack($threadContext));
+    }
+
+    public function testAddAttachment_ThreadContextWithEmptyStack_LogsError(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStub(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $attachment = new AttachmentResult('a');
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Attachment (UUID: {uuid}) not added (parent UUID: {parentUuid})'),
+                self::equalTo(
+                    [
+                        'uuid' => 'a',
+                        'parentUuid' => null,
+                        'exception' => new ActiveExecutionContextNotFoundException(),
+                    ],
+                ),
+            );
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_StorageFailedToProvideStartedTest_LogsError(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $error = new Exception();
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithoutTest('a', $error),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $attachment = new AttachmentResult('b');
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Attachment (UUID: {uuid}) not added (parent UUID: {parentUuid})'),
+                self::identicalTo(
+                    [
+                        'uuid' => 'b',
+                        'parentUuid' => 'a',
+                        'exception' => $error,
+                    ],
+                ),
+            );
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_StorageFailedToProvideStartedStep_LogsError(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $error = new Exception();
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $logger,
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithoutStep('b', $error),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $threadContext->push('b');
+        $attachment = new AttachmentResult('c');
+        $logger
+            ->expects(self::once())
+            ->method('error')
+            ->with(
+                self::stringContains('Attachment (UUID: {uuid}) not added (parent UUID: {parentUuid})'),
+                self::identicalTo(
+                    [
+                        'uuid' => 'c',
+                        'parentUuid' => 'b',
+                        'exception' => $error,
+                    ],
+                ),
+            );
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_ThreadContextWithEmptyStack_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStub(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $attachment = new AttachmentResult('a');
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::isInstanceOf(ActiveExecutionContextNotFoundException::class));
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_StorageFailsToProvideStartedTest_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $error = new Exception();
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithoutTest('a', $error),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $attachment = new AttachmentResult('b');
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_StorageFailsToProvideStartedStep_NotifiesHooksWithError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $error = new Exception();
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithoutStep('b', $error),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $threadContext->push('b');
+        $attachment = new AttachmentResult('c');
+        $hooksNotifier
+            ->expects(self::once())
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_NoExceptionThrownDuringWrite_NotifiesHooksWithoutError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createStorageWithTest(new TestResult('a')),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $attachment = new AttachmentResult('b');
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeAttachmentWrite')
+            ->with(self::identicalTo($attachment));
+        $hooksNotifier
+            ->expects(self::never())
+            ->method('onLifecycleError');
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('before')
+            ->method('afterAttachmentWrite')
+            ->with(self::identicalTo($attachment));
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_ExceptionThrownDuringWrite_NotifiesHooksWithError(): void
+    {
+        $error = new Exception();
+        $resultsWriter = $this->createStub(ResultsWriterInterface::class);
+        $resultsWriter
+            ->method('writeAttachment')
+            ->willThrowException($error);
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $resultsWriter,
+            $hooksNotifier,
+            $this->createStorageWithTest(new TestResult('a')),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $attachment = new AttachmentResult('b');
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeAttachmentWrite')
+            ->with(self::identicalTo($attachment));
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('error')
+            ->after('before')
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('error')
+            ->method('afterAttachmentWrite')
+            ->with(self::identicalTo($attachment));
+        $lifecycle->addAttachment(
+            $attachment,
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
+    public function testAddAttachment_AttachmentNotExcluded_WriterWritesSameAttachmentWithGivenData(): void
+    {
+        $resultsWriter = $this->createMock(ResultsWriterInterface::class);
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $resultsWriter,
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithTest(new TestResult('a')),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $attachment = new AttachmentResult('b');
+        $data = $this->createStub(DataSourceInterface::class);
+        $resultsWriter
+            ->expects(self::once())
+            ->method('writeAttachment')
+            ->with(self::identicalTo($attachment), self::identicalTo($data));
+        $lifecycle->addAttachment($attachment, $data);
+    }
+
+    public function testAddAttachment_AttachmentExcluded_WriterNeverWritesAttachment(): void
+    {
+        $resultsWriter = $this->createMock(ResultsWriterInterface::class);
+        $threadContext = new ThreadContext();
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $resultsWriter,
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createStorageWithTest(new TestResult('a')),
+            $threadContext,
+        );
+
+        $threadContext->push('a');
+        $attachment = new AttachmentResult('b');
+        $resultsWriter
+            ->expects(self::never())
+            ->method('writeAttachment');
+        $lifecycle->addAttachment(
+            $attachment->setExcluded(true),
+            $this->createStub(DataSourceInterface::class),
+        );
+    }
+
     private function extractThreadStack(ThreadContextInterface $threadContext): array
     {
         $items = [];
@@ -3404,6 +4572,21 @@ class AllureLifecycleTest extends TestCase
             ->method('getExecutionContext')
             ->with(self::identicalTo($uuid))
             ->willThrowException($error);
+
+        return $resultStorage;
+    }
+
+    private function createStorageWithInvalidExecutionContext(string $uuid): ResultStorageInterface
+    {
+        $context = $this->createStub(ExecutionContextInterface::class);
+        $context
+            ->method('getUuid')
+            ->willReturn($uuid);
+        $resultStorage = $this->createMock(ResultStorageInterface::class);
+        $resultStorage
+            ->method('getExecutionContext')
+            ->with(self::identicalTo($uuid))
+            ->willReturn($context);
 
         return $resultStorage;
     }

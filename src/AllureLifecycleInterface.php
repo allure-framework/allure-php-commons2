@@ -30,9 +30,9 @@ interface AllureLifecycleInterface
 
     public function writeContainer(string $uuid): void;
 
-    public function startSetUpFixture(FixtureResult $fixture, ?string $containerUuid = null): void;
+    public function startBeforeFixture(FixtureResult $fixture, ?string $containerUuid = null): void;
 
-    public function startTearDownFixture(FixtureResult $fixture, ?string $containerUuid = null): void;
+    public function startAfterFixture(FixtureResult $fixture, ?string $containerUuid = null): void;
 
     public function updateFixture(callable $update, ?string $uuid = null): ?string;
 
