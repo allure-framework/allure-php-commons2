@@ -39,6 +39,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           extensions: pcntl, posix
+          coverage: xdebug
         
       - name: Install dependencies
         if: ${{ matrix.php-version != '8.1' }}

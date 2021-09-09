@@ -53,7 +53,7 @@
   },
   "scripts": {
     "test-cs": "vendor/bin/phpcs -sp",
-    "test-unit": "vendor/bin/phpunit",
+    "test-unit": "vendor/bin/phpunit --log-junit=build/log/junit.xml --coverage-clover=build/coverage/clover.xml --coverage-html",
     "test-psalm": "vendor/bin/psalm",
     "test": [
       "@test-cs",
