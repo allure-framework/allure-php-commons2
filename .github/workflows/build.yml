@@ -57,4 +57,10 @@ jobs:
           ${{ matrix.composer-options }}
 
       - name: Run tests
+        if: ${{ matrix.php-version != '8.1' }}
+        run: composer test
+
+      - name: Run tests (experimental)
+        if: ${{ matrix.php-version == '8.1' }}
+        continue-on-error: true
         run: composer test
