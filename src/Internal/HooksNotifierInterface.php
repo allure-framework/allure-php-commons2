@@ -36,6 +36,7 @@ use Qameta\Allure\Hook\BeforeTestStartHookInterface;
 use Qameta\Allure\Hook\BeforeTestStopHookInterface;
 use Qameta\Allure\Hook\BeforeTestUpdateHookInterface;
 use Qameta\Allure\Hook\BeforeTestWriteHookInterface;
+use Qameta\Allure\Hook\OnLifecycleErrorHookInterface;
 
 interface HooksNotifierInterface extends
     BeforeContainerStartHookInterface,
@@ -69,6 +70,7 @@ interface HooksNotifierInterface extends
     BeforeStepStopHookInterface,
     AfterStepStopHookInterface,
     BeforeAttachmentWriteHookInterface,
-    AfterAttachmentWriteHookInterface
+    AfterAttachmentWriteHookInterface,
+    OnLifecycleErrorHookInterface
 {
 }

@@ -18,4 +18,12 @@ interface ThreadContextInterface
     public function getCurrentTest(): ?string;
 
     public function getCurrentStep(): ?string;
+
+    public function getCurrentTestOrStep(): ?string;
+
+    public function resetContainer(): ThreadContextInterface;
+
+    public function setContainer(string $uuid): ThreadContextInterface;
+
+    public function getContainer(): ?string;
 }

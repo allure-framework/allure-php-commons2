@@ -9,5 +9,5 @@ use Qameta\Allure\Model\ContainerResult;
 interface AfterContainerStartHookInterface extends LifecycleHookInterface
 {
 
-    public function afterContainerStart(ContainerResult $container, bool $isSuccess): void;
+    public function afterContainerStart(ContainerResult $container): void;
 }

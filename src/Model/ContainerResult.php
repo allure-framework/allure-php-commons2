@@ -18,12 +18,12 @@ final class ContainerResult extends StorableResult
     /**
      * @var list<FixtureResult>
      */
-    protected array $setUps = [];
+    protected array $befores = [];
 
     /**
      * @var list<FixtureResult>
      */
-    protected array $tearDowns = [];
+    protected array $afters = [];
 
     /**
      * @var list<Link>
@@ -58,19 +58,19 @@ final class ContainerResult extends StorableResult
     /**
      * @return list<FixtureResult>
      */
-    public function getSetUps(): array
+    public function getBefores(): array
     {
-        return $this->setUps;
+        return $this->befores;
     }
 
-    public function addSetUps(FixtureResult ...$setUps): self
+    public function addBefores(FixtureResult ...$setUps): self
     {
-        return $this->setSetUps(...$this->setUps, ...array_values($setUps));
+        return $this->setBefores(...$this->befores, ...array_values($setUps));
     }
 
-    public function setSetUps(FixtureResult ...$setUps): self
+    public function setBefores(FixtureResult ...$befores): self
     {
-        $this->setUps = array_values($setUps);
+        $this->befores = array_values($befores);
 
         return $this;
     }
@@ -78,19 +78,19 @@ final class ContainerResult extends StorableResult
     /**
      * @return list<FixtureResult>
      */
-    public function getTearDowns(): array
+    public function getAfters(): array
     {
-        return $this->tearDowns;
+        return $this->afters;
     }
 
-    public function addTearDowns(FixtureResult ...$tearDowns): self
+    public function addAfters(FixtureResult ...$tearDowns): self
     {
-        return $this->setTearDowns(...$this->tearDowns, ...array_values($tearDowns));
+        return $this->setAfters(...$this->afters, ...array_values($tearDowns));
     }
 
-    public function setTearDowns(FixtureResult ...$tearDowns): self
+    public function setAfters(FixtureResult ...$afters): self
     {
-        $this->tearDowns = array_values($tearDowns);
+        $this->afters = array_values($afters);
 
         return $this;
     }
@@ -132,9 +132,9 @@ final class ContainerResult extends StorableResult
     public function getNestedResults(): array
     {
         return [
-            ...$this->setUps,
+            ...$this->befores,
             ...$this->children,
-            ...$this->tearDowns,
+            ...$this->afters,
         ];
     }
 }

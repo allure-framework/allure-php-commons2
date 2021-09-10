@@ -30,15 +30,15 @@
     "php": "^8",
     "ext-json": "*",
     "doctrine/annotations": "^1.12",
-    "psr/log": "^1",
+    "psr/log": "^1 || ^2 || ^3",
     "ramsey/uuid": "^3 || ^4"
   },
   "require-dev": {
     "jetbrains/phpstorm-attributes": "^1",
-    "phpunit/phpunit": "^9.5.8",
+    "phpunit/phpunit": "^9.5.9",
     "psalm/plugin-phpunit": "^0.16.1",
     "squizlabs/php_codesniffer": "^3.6",
-    "vimeo/psalm": "^4.9.3"
+    "vimeo/psalm": "^4.10"
   },
   "autoload": {
     "psr-4": {
@@ -53,12 +53,17 @@
   },
   "scripts": {
     "test-cs": "vendor/bin/phpcs -sp",
-    "test-unit": "vendor/bin/phpunit",
+    "test-unit": "vendor/bin/phpunit --log-junit=build/log/junit.xml --coverage-clover=build/coverage/clover.xml --coverage-text",
     "test-psalm": "vendor/bin/psalm",
     "test": [
       "@test-cs",
       "@test-unit",
       "@test-psalm"
     ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "v2.x.x-dev"
+    }
   }
 }

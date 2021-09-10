@@ -49,6 +49,7 @@ final class LifecycleBuilder implements LifecycleBuilderInterface
             $resultsWriter,
             new HooksNotifier($this->getLogger(), ...$this->lifecycleHooks),
             new ResultStorage(),
+            new ThreadContext(),
         );
     }
 

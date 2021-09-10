@@ -38,6 +38,7 @@ use Qameta\Allure\Hook\BeforeTestStopHookInterface;
 use Qameta\Allure\Hook\BeforeTestUpdateHookInterface;
 use Qameta\Allure\Hook\BeforeTestWriteHookInterface;
 use Qameta\Allure\Hook\LifecycleHookInterface;
+use Qameta\Allure\Hook\OnLifecycleErrorHookInterface;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
 use Qameta\Allure\Model\FixtureResult;
@@ -74,12 +75,12 @@ final class HooksNotifier implements HooksNotifierInterface
         );
     }
 
-    public function afterContainerStart(ContainerResult $container, bool $isSuccess): void
+    public function afterContainerStart(ContainerResult $container): void
     {
         $this->forEachHook(
             $container->getResultType(),
             AfterContainerStartHookInterface::class,
-            static fn (AfterContainerStartHookInterface $hook) => $hook->afterContainerStart($container, $isSuccess),
+            static fn (AfterContainerStartHookInterface $hook) => $hook->afterContainerStart($container),
         );
     }
 
@@ -350,6 +351,15 @@ final class HooksNotifier implements HooksNotifierInterface
             $attachment->getResultType(),
             AfterAttachmentWriteHookInterface::class,
             static fn (AfterAttachmentWriteHookInterface $hook) => $hook->afterAttachmentWrite($attachment),
+        );
+    }
+
+    public function onLifecycleError(Throwable $error): void
+    {
+        $this->forEachHook(
+            ResultType::unknown(),
+            OnLifecycleErrorHookInterface::class,
+            static fn (OnLifecycleErrorHookInterface $hook) => $hook->onLifecycleError($error),
         );
     }
 
