@@ -43,7 +43,7 @@ final class StatusDetails implements JsonSerializable
         return $this;
     }
 
-    public function getFlaky(): ?bool
+    public function isFlaky(): ?bool
     {
         return $this->flaky;
     }

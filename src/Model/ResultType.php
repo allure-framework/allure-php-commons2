@@ -10,7 +10,7 @@ final class ResultType extends AbstractEnum
     private const UNKNOWN = 'unknown';
     private const CONTAINER = 'container';
     private const FIXTURE = 'fixture';
-    private const TEST_CASE = 'testCase';
+    private const TEST = 'test';
     private const STEP = 'step';
     private const ATTACHMENT = 'attachment';
     private const EXECUTABLE_CONTEXT = 'executable_context';
@@ -32,7 +32,7 @@ final class ResultType extends AbstractEnum
 
     public static function test(): self
     {
-        return self::create(self::TEST_CASE);
+        return self::create(self::TEST);
     }
 
     public static function step(): self

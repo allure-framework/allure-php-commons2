@@ -13,12 +13,12 @@ final class LinkType extends AbstractEnum implements JsonSerializable
     public const TMS = "tms";
     public const CUSTOM = "custom";
 
-    public static function fromString(string $value): self
+    public static function fromOptionalString(?string $value): self
     {
         return match ($value) {
             self::ISSUE => self::issue(),
             self::TMS => self::tms(),
-            default => parent::create(self::CUSTOM),
+            default => self::custom(),
         };
     }
 

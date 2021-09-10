@@ -73,9 +73,7 @@ class AttributeParser
         return new Model\Link(
             name: $link->getName(),
             url: $link->getUrl() ?? $this->getLinkUrl($link->getName(), $linkType),
-            type: isset($linkType)
-                ? Model\LinkType::fromString($linkType)
-                : null,
+            type: Model\LinkType::fromOptionalString($linkType),
         );
     }
 
