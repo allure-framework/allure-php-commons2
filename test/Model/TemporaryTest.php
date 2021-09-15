@@ -87,7 +87,6 @@ class TemporaryTest extends TestCase
         Allure::owner('Owner label');
         Allure::lead('Lead label');
         Allure::label('Label name', 'Label value');
-        Allure::host('Host label');
         Allure::severity(Severity::critical());
         Allure::parameter('Test param1 name', 'Test param1 value');
         Allure::parameter('Test param2 name', null);
