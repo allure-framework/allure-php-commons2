@@ -40,20 +40,12 @@ jobs:
           php-version: ${{ matrix.php-version }}
           extensions: pcntl, posix
           coverage: xdebug
-        
-      - name: Install dependencies
-        if: ${{ matrix.php-version != '8.1' }}
-        run: composer update
-          --prefer-dist
-          --no-progress
-          ${{ matrix.composer-options }}
+          ini-values: error_reporting=E_ALL
 
-      - name: Install dependencies (experimental)
-        if: ${{ matrix.php-version == '8.1' }}
+      - name: Install dependencies
         run: composer update
           --prefer-dist
           --no-progress
-          --ignore-platform-req=php
           ${{ matrix.composer-options }}
 
       - name: Run tests

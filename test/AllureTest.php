@@ -711,23 +711,6 @@ class AllureTest extends TestCase
         self::assertSame('c', $label?->getValue());
     }
 
-    public function testHost_GivenValue_TestHasMatchingLabel(): void
-    {
-        $test = new TestResult('a');
-        Allure::setLifecycleBuilder(
-            $this->createLifecycleBuilder(
-                $this->createResultFactoryWithTest($test),
-                $this->createLifecycleWithUpdatableTest($test),
-            ),
-        );
-
-        Allure::setOutputDirectory('b');
-        Allure::host('c');
-        $label = $test->getLabels()[0] ?? null;
-        self::assertSame('host', $label?->getName());
-        self::assertSame('c', $label?->getValue());
-    }
-
     public function testPackage_GivenValue_TestHasMatchingLabel(): void
     {
         $test = new TestResult('a');

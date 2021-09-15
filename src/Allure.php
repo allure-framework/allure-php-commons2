@@ -204,11 +204,6 @@ final class Allure
         self::getInstance()->doLabel(Label::lead($value));
     }
 
-    public static function host(string $value): void
-    {
-        self::getInstance()->doLabel(Label::host($value));
-    }
-
     public static function package(string $value): void
     {
         self::getInstance()->doLabel(Label::package($value));
