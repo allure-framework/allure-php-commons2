@@ -13,9 +13,9 @@ interface ResultInterface extends JsonSerializable
 
     public function getResultType(): ResultType;
 
-    public function getExcluded(): bool;
+    public function getMuted(): bool;
 
-    public function setExcluded(bool $excluded = true): static;
+    public function setMuted(bool $muted = true): static;
 
     /**
      * @return list<ResultInterface>

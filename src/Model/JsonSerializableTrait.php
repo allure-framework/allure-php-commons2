@@ -53,7 +53,7 @@ trait JsonSerializableTrait
                     $property,
                     static fn(mixed $propertyItem): bool =>
                         !$propertyItem instanceof ResultInterface ||
-                        !$propertyItem->getExcluded(),
+                        !$propertyItem->getMuted(),
                 )
                 : $property,
             array_combine($propertyKeys, $preparedProperties),

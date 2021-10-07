@@ -65,9 +65,4 @@ final class Parameter implements JsonSerializable
 
         return $this;
     }
-
-    protected function excludeFromSerialization(): array
-    {
-        return ['excluded', 'mode'];
-    }
 }
