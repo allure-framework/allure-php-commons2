@@ -868,7 +868,7 @@ class AllureLifecycleTest extends TestCase
             new ThreadContext(),
         );
 
-        $container->setMuted(true);
+        $container->setExcluded(true);
         $resultsWriter
             ->expects(self::exactly(6))
             ->method('removeAttachment')
@@ -901,7 +901,7 @@ class AllureLifecycleTest extends TestCase
         $container = new ContainerResult('a');
 
         $test = new TestResult('b');
-        $container->addChildren($test->setMuted(true));
+        $container->addChildren($test->setExcluded(true));
 
         $lifecycle = new AllureLifecycle(
             $logger,
@@ -935,7 +935,7 @@ class AllureLifecycleTest extends TestCase
 
         $test = new TestResult('b');
         $testAttachment = new AttachmentResult('c');
-        $test->addAttachments($testAttachment->setMuted(true));
+        $test->addAttachments($testAttachment->setExcluded(true));
         $container->addChildren($test);
 
         $lifecycle = new AllureLifecycle(
@@ -992,7 +992,7 @@ class AllureLifecycleTest extends TestCase
             new ThreadContext(),
         );
 
-        $container->setMuted(true);
+        $container->setExcluded(true);
         $resultsWriter
             ->expects(self::never())
             ->method('writeContainer');
@@ -2694,7 +2694,7 @@ class AllureLifecycleTest extends TestCase
             new ThreadContext(),
         );
 
-        $test->setMuted(true);
+        $test->setExcluded(true);
         $resultWriter
             ->expects(self::never())
             ->method('writeTest');
@@ -2722,7 +2722,7 @@ class AllureLifecycleTest extends TestCase
             new ThreadContext(),
         );
 
-        $test->setMuted(true);
+        $test->setExcluded(true);
         $resultsWriter
             ->expects(self::exactly(2))
             ->method('removeAttachment')
@@ -2744,7 +2744,7 @@ class AllureLifecycleTest extends TestCase
 
         $test = new TestResult('a');
         $testAttachment = new AttachmentResult('b');
-        $test->addAttachments($testAttachment->setMuted(true));
+        $test->addAttachments($testAttachment->setExcluded(true));
 
         $lifecycle = new AllureLifecycle(
             $logger,
@@ -4430,7 +4430,7 @@ class AllureLifecycleTest extends TestCase
             ->expects(self::never())
             ->method('writeAttachment');
         $lifecycle->addAttachment(
-            $attachment->setMuted(true),
+            $attachment->setExcluded(true),
             $this->createStub(DataSourceInterface::class),
         );
     }

@@ -8,7 +8,7 @@ abstract class Result implements ResultInterface
 {
     use JsonSerializableTrait;
 
-    private bool $muted = false;
+    private bool $excluded = false;
 
     public function __construct(
         protected string $uuid,
@@ -20,14 +20,14 @@ abstract class Result implements ResultInterface
         return $this->uuid;
     }
 
-    final public function getMuted(): bool
+    final public function getExcluded(): bool
     {
-        return $this->muted;
+        return $this->excluded;
     }
 
-    final public function setMuted(bool $muted = true): static
+    final public function setExcluded(bool $excluded = true): static
     {
-        $this->muted = $muted;
+        $this->excluded = $excluded;
 
         return $this;
     }
@@ -37,6 +37,6 @@ abstract class Result implements ResultInterface
      */
     protected function excludeFromSerialization(): array
     {
-        return ['muted'];
+        return ['excluded'];
     }
 }

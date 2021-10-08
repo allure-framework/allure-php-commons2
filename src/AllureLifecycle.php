@@ -139,11 +139,11 @@ final class AllureLifecycle implements AllureLifecycleInterface
         }
         $this->notifier->beforeContainerWrite($container);
         try {
-            if ($container->getMuted()) {
-                $this->muteNestedResults($container);
+            if ($container->getExcluded()) {
+                $this->excludeNestedResults($container);
             }
-            $this->removeMutedNestedResults($container);
-            if (!$container->getMuted()) {
+            $this->removeExcludedNestedResults($container);
+            if (!$container->getExcluded()) {
                 $this->resultsWriter->writeContainer($container);
             }
             $this->storage->unset($container->getUuid());
@@ -154,19 +154,19 @@ final class AllureLifecycle implements AllureLifecycleInterface
         $this->notifier->afterContainerWrite($container);
     }
 
-    private function muteNestedResults(ResultInterface $result): void
+    private function excludeNestedResults(ResultInterface $result): void
     {
         foreach ($result->getNestedResults() as $nestedResult) {
-            $nestedResult->setMuted(true);
-            $this->muteNestedResults($nestedResult);
+            $nestedResult->setExcluded(true);
+            $this->excludeNestedResults($nestedResult);
         }
     }
 
-    private function removeMutedNestedResults(ResultInterface $result): void
+    private function removeExcludedNestedResults(ResultInterface $result): void
     {
         foreach ($result->getNestedResults() as $nestedResult) {
-            $this->removeMutedNestedResults($nestedResult);
-            if ($nestedResult->getMuted()) {
+            $this->removeExcludedNestedResults($nestedResult);
+            if ($nestedResult->getExcluded()) {
                 if ($nestedResult instanceof AttachmentResult) {
                     $this->removeAttachment($nestedResult);
                 } elseif ($nestedResult instanceof TestResult) {
@@ -393,11 +393,11 @@ final class AllureLifecycle implements AllureLifecycleInterface
         }
         $this->notifier->beforeTestWrite($test);
         try {
-            if ($test->getMuted()) {
-                $this->muteNestedResults($test);
+            if ($test->getExcluded()) {
+                $this->excludeNestedResults($test);
             }
-            $this->removeMutedNestedResults($test);
-            if (!$test->getMuted()) {
+            $this->removeExcludedNestedResults($test);
+            if (!$test->getExcluded()) {
                 $this->resultsWriter->writeTest($test);
             }
             $this->storage->unset($test->getUuid());
@@ -549,7 +549,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
         }
         $this->notifier->beforeAttachmentWrite($attachment);
         try {
-            if (!$attachment->getMuted()) {
+            if (!$attachment->getExcluded()) {
                 $this->resultsWriter->writeAttachment($attachment, $data);
             }
         } catch (Throwable $e) {
