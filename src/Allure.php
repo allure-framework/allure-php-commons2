@@ -258,10 +258,10 @@ final class Allure
         );
     }
 
-    public static function title(string $title): void
+    public static function displayName(string $name): void
     {
         self::getLifecycle()->updateExecutionContext(
-            fn (ExecutionContextInterface $context) => $context->setName($title),
+            fn (ExecutionContextInterface $context) => $context->setName($name),
         );
     }
 
@@ -373,7 +373,7 @@ final class Allure
             $parser = $this->readCallableAttributes($callable);
             $this->doGetLifecycle()->updateStep(
                 fn (StepResult $s): StepResult => $s
-                    ->setName($name ?? $parser->getTitle() ?? $this->defaultStepName)
+                    ->setName($name ?? $parser->getDisplayName() ?? $this->defaultStepName)
                     ->addParameters(...$parser->getParameters()),
                 $step->getUuid(),
             );

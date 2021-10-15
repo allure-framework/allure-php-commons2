@@ -9,7 +9,7 @@ use Qameta\Allure\Attribute\Title;
 
 /**
  * @covers \Qameta\Allure\Attribute\Title
- * @covers \Qameta\Allure\Attribute\AbstractTitle
+ * @covers \Qameta\Allure\Attribute\AbstractDisplayName
  */
 class TitleTest extends TestCase
 {

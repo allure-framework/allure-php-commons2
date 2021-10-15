@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Attribute;
 
-abstract class AbstractTitle implements TitleInterface
+abstract class AbstractDisplayName implements DisplayNameInterface
 {
     public function __construct(private string $value)
     {

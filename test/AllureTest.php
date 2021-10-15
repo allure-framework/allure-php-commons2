@@ -8,6 +8,7 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Allure;
 use Qameta\Allure\AllureLifecycleInterface;
+use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Parameter;
 use Qameta\Allure\Attribute\Title;
 use Qameta\Allure\Exception\OutputDirectorySetFailureException;
@@ -228,7 +229,7 @@ class AllureTest extends TestCase
         Allure::runStep(fn () => throw $error);
     }
 
-    public function testRunStep_NoNameNorTitleAttributeProvided_StepHasDefaultName(): void
+    public function testRunStep_NoNameNorDisplayNameAttributeProvided_StepHasDefaultName(): void
     {
         $step = new StepResult('a');
         Allure::setLifecycleBuilder(
@@ -243,7 +244,7 @@ class AllureTest extends TestCase
         self::assertSame('step', $step->getName());
     }
 
-    public function testRunStep_NoNameNorTitleAttributeProvidedButDefaultNameIsSet_StepHasMatchingName(): void
+    public function testRunStep_NoNameNorDisplayNameAttributeProvidedButDefaultNameIsSet_StepHasMatchingName(): void
     {
         $step = new StepResult('a');
         Allure::setLifecycleBuilder(
@@ -259,7 +260,7 @@ class AllureTest extends TestCase
         self::assertSame('c', $step->getName());
     }
 
-    public function testRunStep_OnlyClosureTitleAttributeProvided_StepHasProvidedName(): void
+    public function testRunStep_OnlyClosureDisplayNameAttributeProvided_StepHasProvidedName(): void
     {
         $step = new StepResult('a');
         Allure::setLifecycleBuilder(
@@ -270,11 +271,11 @@ class AllureTest extends TestCase
         );
 
         Allure::setOutputDirectory('b');
-        Allure::runStep(#[Title('c')] fn () => null);
+        Allure::runStep(#[DisplayName('c')] fn () => null);
         self::assertSame('c', $step->getName());
     }
 
-    public function testRunStep_OnlyMethodTitleAttributeProvided_StepHasMatchingName(): void
+    public function testRunStep_OnlyMethodDisplayNameAttributeProvided_StepHasMatchingName(): void
     {
         $step = new StepResult('a');
         Allure::setLifecycleBuilder(
@@ -289,12 +290,12 @@ class AllureTest extends TestCase
         self::assertSame('c', $step->getName());
     }
 
-    #[Title('c')]
+    #[DisplayName('c')]
     public function titledStep(): void
     {
     }
 
-    public function testRunStep_BothNameAndTitleAttributeProvided_StepHasMatchingName(): void
+    public function testRunStep_BothNameAndDisplayNameAttributeProvided_StepHasMatchingName(): void
     {
         $step = new StepResult('a');
         Allure::setLifecycleBuilder(
@@ -305,7 +306,7 @@ class AllureTest extends TestCase
         );
 
         Allure::setOutputDirectory('b');
-        Allure::runStep(#[Title('c')] fn () => null, 'd');
+        Allure::runStep(#[DisplayName('c')] fn () => null, 'd');
         self::assertSame('d', $step->getName());
     }
 
@@ -1026,7 +1027,7 @@ class AllureTest extends TestCase
         ];
     }
 
-    public function testTitle_LifecycleUpdatesTest_TestHasSameName(): void
+    public function testDisplayName_LifecycleUpdatesTest_TestHasSameName(): void
     {
         $test = new TestResult('a');
         Allure::setLifecycleBuilder(
@@ -1037,7 +1038,7 @@ class AllureTest extends TestCase
         );
 
         Allure::setOutputDirectory('b');
-        Allure::title('c');
+        Allure::displayName('c');
         self::assertSame('c', $test->getName());
     }
 
@@ -1052,7 +1053,7 @@ class AllureTest extends TestCase
         );
 
         Allure::setOutputDirectory('b');
-        Allure::title('c');
+        Allure::displayName('c');
         self::assertSame('c', $step->getName());
     }
 

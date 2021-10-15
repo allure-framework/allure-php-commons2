@@ -7,7 +7,7 @@ use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Qameta\Allure\Allure;
-use Qameta\Allure\Attribute\Title;
+use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Parameter as AttrParameter;
 use Qameta\Allure\Io\ClockInterface;
 use Qameta\Allure\Model\Label;
@@ -112,7 +112,7 @@ class TemporaryTest extends TestCase
         Allure::attachmentFile('Attachment2 name', __FILE__, 'text/plain', 'txt');
 
         Allure::runStep(
-            #[Title('Step 1 attribute')]
+            #[DisplayName('Step 1 attribute')]
             #[AttrParameter('foo', 'bar')]
             function (StepContextInterface $step): void {
                 $step->parameter('Step 1 param', 'xxx');
@@ -152,7 +152,7 @@ class TemporaryTest extends TestCase
         $lifecycle->writeContainer($container->getUuid());
     }
 
-    #[Title('Method step')]
+    #[DisplayName('Method step')]
     public function step(StepContextInterface $context): void
     {
         $context->parameter('baz', 'bar');

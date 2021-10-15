@@ -9,7 +9,7 @@ use Qameta\Allure\Model;
 class AttributeParser
 {
 
-    private ?string $title = null;
+    private ?string $displayName = null;
 
     private ?string $description = null;
 
@@ -44,8 +44,8 @@ class AttributeParser
     private function processAnnotations(AttributeInterface ...$attributes): void
     {
         foreach ($attributes as $attribute) {
-            if ($attribute instanceof TitleInterface) {
-                $this->title = $attribute->getValue();
+            if ($attribute instanceof DisplayNameInterface) {
+                $this->displayName = $attribute->getValue();
             }
             if ($attribute instanceof DescriptionInterface) {
                 if ($attribute->isHtml()) {
@@ -126,9 +126,17 @@ class AttributeParser
         return $this->parameters;
     }
 
+    /**
+     * @deprecated Please use {@see getDisplayName()} method.
+     */
     public function getTitle(): ?string
     {
-        return $this->title;
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
     }
 
     public function getDescription(): ?string
