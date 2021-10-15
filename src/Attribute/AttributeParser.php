@@ -4,9 +4,21 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Attribute;
 
+use Closure;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Qameta\Allure\Exception\InvalidMethodNameException;
 use Qameta\Allure\Model;
+use Qameta\Allure\Model\ModelProviderInterface;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionMethod;
+use ReflectionProperty;
 
-class AttributeParser implements Model\ModelProviderInterface
+use function array_merge;
+use function is_string;
+
+class AttributeParser implements ModelProviderInterface
 {
 
     private ?string $displayName = null;
@@ -39,6 +51,54 @@ class AttributeParser implements Model\ModelProviderInterface
         private array $linkTemplates = [],
     ) {
         $this->processAnnotations(...$attributes);
+    }
+
+    /**
+     * @param class-string|object|null             $classOrObject
+     * @param callable-string|Closure|null         $methodOrFunction
+     * @param string|null                          $property
+     * @param array<string, LinkTemplateInterface> $linkTemplates
+     * @return list<ModelProviderInterface>
+     * @throws ReflectionException
+     */
+    public static function createForChain(
+        string|object|null $classOrObject,
+        string|Closure|null $methodOrFunction = null,
+        ?string $property = null,
+        array $linkTemplates = [],
+    ): array {
+        $reader = new LegacyAttributeReader(
+            new AnnotationReader(),
+            new AttributeReader(),
+        );
+        $annotations = [];
+
+        if (isset($classOrObject)) {
+            $annotations[] = $reader->getClassAnnotations(new ReflectionClass($classOrObject));
+            if (isset($property)) {
+                $annotations[] = $reader->getPropertyAnnotations(new ReflectionProperty($classOrObject, $property));
+            }
+        }
+
+        if (isset($methodOrFunction)) {
+            $annotations[] = isset($classOrObject)
+                ? $reader->getMethodAnnotations(
+                    new ReflectionMethod(
+                        $classOrObject,
+                        is_string($methodOrFunction)
+                            ? $methodOrFunction
+                            : throw new InvalidMethodNameException($methodOrFunction),
+                    ),
+                )
+                : $reader->getFunctionAnnotations(new ReflectionFunction($methodOrFunction));
+        }
+
+        return [
+            new self(
+                array_merge(...$annotations),
+                $linkTemplates,
+            )
+        ];
     }
 
     private function processAnnotations(AttributeInterface ...$attributes): void
