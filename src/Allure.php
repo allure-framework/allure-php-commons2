@@ -237,12 +237,12 @@ final class Allure
         );
     }
 
-    public static function issue(string $name, string $url): void
+    public static function issue(string $name, ?string $url = null): void
     {
         self::getInstance()->doLink(Link::issue($name, $url));
     }
 
-    public static function tms(string $name, string $url): void
+    public static function tms(string $name, ?string $url = null): void
     {
         self::getInstance()->doLink(Link::tms($name, $url));
     }

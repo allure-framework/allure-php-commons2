@@ -870,7 +870,7 @@ class AllureTest extends TestCase
         ];
     }
 
-    public function testIssue_GivenValue_TestHasMatchingLink(): void
+    public function testIssue_GivenNameWithValue_TestHasMatchingLink(): void
     {
         $test = new TestResult('a');
         Allure::setLifecycleBuilder(
@@ -883,12 +883,32 @@ class AllureTest extends TestCase
         Allure::setOutputDirectory('b');
         Allure::issue('c', 'd');
         $link = $test->getLinks()[0] ?? null;
-        self::assertSame(LinkType::issue(), $link?->getType());
-        self::assertSame('c', $link?->getName());
-        self::assertSame('d', $link?->getUrl());
+        self::assertNotNull($link);
+        self::assertSame(LinkType::issue(), $link->getType());
+        self::assertSame('c', $link->getName());
+        self::assertSame('d', $link->getUrl());
     }
 
-    public function testTms_GivenValue_TestHasMatchingLink(): void
+    public function testIssue_GivenNameWithoutValue_TestHasMatchingLink(): void
+    {
+        $test = new TestResult('a');
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithTest($test),
+                $this->createLifecycleWithUpdatableTest($test),
+            ),
+        );
+
+        Allure::setOutputDirectory('b');
+        Allure::issue('c');
+        $link = $test->getLinks()[0] ?? null;
+        self::assertNotNull($link);
+        self::assertSame(LinkType::issue(), $link->getType());
+        self::assertSame('c', $link->getName());
+        self::assertNull($link->getUrl());
+    }
+
+    public function testTms_GivenNameWithValue_TestHasMatchingLink(): void
     {
         $test = new TestResult('a');
         Allure::setLifecycleBuilder(
@@ -901,9 +921,29 @@ class AllureTest extends TestCase
         Allure::setOutputDirectory('b');
         Allure::tms('c', 'd');
         $link = $test->getLinks()[0] ?? null;
-        self::assertSame(LinkType::tms(), $link?->getType());
-        self::assertSame('c', $link?->getName());
-        self::assertSame('d', $link?->getUrl());
+        self::assertNotNull($link);
+        self::assertSame(LinkType::tms(), $link->getType());
+        self::assertSame('c', $link->getName());
+        self::assertSame('d', $link->getUrl());
+    }
+
+    public function testTms_GivenNameWithoutValue_TestHasMatchingLink(): void
+    {
+        $test = new TestResult('a');
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithTest($test),
+                $this->createLifecycleWithUpdatableTest($test),
+            ),
+        );
+
+        Allure::setOutputDirectory('b');
+        Allure::tms('c');
+        $link = $test->getLinks()[0] ?? null;
+        self::assertNotNull($link);
+        self::assertSame(LinkType::tms(), $link->getType());
+        self::assertSame('c', $link->getName());
+        self::assertNull($link->getUrl());
     }
 
     public function testLink_GivenUrl_TestHasLinkWithSameUrl(): void
