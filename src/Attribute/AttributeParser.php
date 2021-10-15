@@ -6,7 +6,7 @@ namespace Qameta\Allure\Attribute;
 
 use Qameta\Allure\Model;
 
-class AttributeParser
+class AttributeParser implements Model\ModelProviderInterface
 {
 
     private ?string $displayName = null;
