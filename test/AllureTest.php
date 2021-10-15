@@ -986,6 +986,36 @@ class AllureTest extends TestCase
         ];
     }
 
+    public function testTitle_LifecycleUpdatesTest_TestHasSameName(): void
+    {
+        $test = new TestResult('a');
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithTest($test),
+                $this->createLifecycleWithUpdatableTest($test),
+            ),
+        );
+
+        Allure::setOutputDirectory('b');
+        Allure::title('c');
+        self::assertSame('c', $test->getName());
+    }
+
+    public function testTitle_LifecycleUpdatesStep_StepHasSameName(): void
+    {
+        $step = new StepResult('a');
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithStep($step),
+                $this->createLifecycleWithUpdatableStep($step),
+            ),
+        );
+
+        Allure::setOutputDirectory('b');
+        Allure::title('c');
+        self::assertSame('c', $step->getName());
+    }
+
     public function testDescription_LifecycleUpdatesTest_TestHasSameDescription(): void
     {
         $test = new TestResult('a');
@@ -1015,7 +1045,6 @@ class AllureTest extends TestCase
         Allure::description('c');
         self::assertSame('c', $step->getDescription());
     }
-
 
     public function testDescriptionHtml_LifecycleUpdatesTest_TestHasSameDescription(): void
     {

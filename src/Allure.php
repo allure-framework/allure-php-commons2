@@ -258,6 +258,13 @@ final class Allure
         );
     }
 
+    public static function title(string $title): void
+    {
+        self::getLifecycle()->updateExecutionContext(
+            fn (ExecutionContextInterface $context) => $context->setName($title),
+        );
+    }
+
     public static function description(string $description): void
     {
         self::getLifecycle()->updateExecutionContext(
