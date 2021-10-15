@@ -17,6 +17,7 @@ use Qameta\Allure\Model\Status;
 use Qameta\Allure\Model\StatusDetails;
 use Qameta\Allure\StepContextInterface;
 use RuntimeException;
+use Throwable;
 
 class TemporaryTest extends TestCase
 {
@@ -27,6 +28,9 @@ class TemporaryTest extends TestCase
         Allure::setOutputDirectory(__DIR__ . '/../../build/allure');
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testLifecycle(): void
     {
         $this->expectNotToPerformAssertions();
@@ -95,8 +99,6 @@ class TemporaryTest extends TestCase
         Allure::subSuite('Sub-suite label');
         Allure::tag('Tag label');
         Allure::package('Package label');
-        Allure::framework('Framework label');
-        Allure::language('Language label');
         Allure::epic('Epic label');
         Allure::feature('Feature label');
         Allure::feature('Another feature label');

@@ -209,16 +209,6 @@ final class Allure
         self::getInstance()->doLabel(Label::package($value));
     }
 
-    public static function framework(string $value): void
-    {
-        self::getInstance()->doLabel(Label::framework($value));
-    }
-
-    public static function language(string $value): void
-    {
-        self::getInstance()->doLabel(Label::language($value));
-    }
-
     public static function label(string $name, string $value): void
     {
         self::getInstance()->doLabel(

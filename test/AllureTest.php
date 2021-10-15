@@ -728,40 +728,6 @@ class AllureTest extends TestCase
         self::assertSame('c', $label?->getValue());
     }
 
-    public function testFramework_GivenValue_TestHasMatchingLabel(): void
-    {
-        $test = new TestResult('a');
-        Allure::setLifecycleBuilder(
-            $this->createLifecycleBuilder(
-                $this->createResultFactoryWithTest($test),
-                $this->createLifecycleWithUpdatableTest($test),
-            ),
-        );
-
-        Allure::setOutputDirectory('b');
-        Allure::framework('c');
-        $label = $test->getLabels()[0] ?? null;
-        self::assertSame('framework', $label?->getName());
-        self::assertSame('c', $label?->getValue());
-    }
-
-    public function testLanguage_GivenValue_TestHasMatchingLabel(): void
-    {
-        $test = new TestResult('a');
-        Allure::setLifecycleBuilder(
-            $this->createLifecycleBuilder(
-                $this->createResultFactoryWithTest($test),
-                $this->createLifecycleWithUpdatableTest($test),
-            ),
-        );
-
-        Allure::setOutputDirectory('b');
-        Allure::language('c');
-        $label = $test->getLabels()[0] ?? null;
-        self::assertSame('language', $label?->getName());
-        self::assertSame('c', $label?->getValue());
-    }
-
     public function testLabel_GivenNameAndValue_TestHasMatchingLabel(): void
     {
         $test = new TestResult('a');
