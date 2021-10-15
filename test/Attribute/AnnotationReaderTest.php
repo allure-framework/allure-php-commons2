@@ -8,16 +8,16 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineReader;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Attribute\AttributeReader;
 use Qameta\Allure\Attribute\Description;
+use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Feature;
 use Qameta\Allure\Attribute\LabelInterface;
 use Qameta\Allure\Attribute\LegacyAttributeReader;
 use Qameta\Allure\Attribute\Story;
-use Qameta\Allure\Attribute\Title;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 use Yandex\Allure\Adapter\Annotation\Description as LegacyDescription;
-use Yandex\Allure\Adapter\Annotation\Title as LegacyTitle;
+use Yandex\Allure\Adapter\Annotation\Title;
 
 use function array_map;
 
@@ -247,7 +247,7 @@ class AnnotationReaderTest extends TestCase
         $annotations = $reader->getMethodAnnotations(new ReflectionMethod($this, 'demoOnlyLegacyAnnotations'));
         /** @psalm-suppress DeprecatedClass */
         $expectedList = [
-            ['class' => Title::class, 'value' => 'b'],
+            ['class' => DisplayName::class, 'value' => 'b'],
             ['class' => Description::class, 'value' => 'c'],
         ];
         self::assertSame($expectedList, $this->exportAnnotations(...$annotations));
@@ -272,7 +272,7 @@ class AnnotationReaderTest extends TestCase
         if ($annotation instanceof AnotherNativePropertyAttribute) {
             $data['value'] = $annotation->getValue();
         }
-        if ($annotation instanceof Title) {
+        if ($annotation instanceof DisplayName) {
             $data['value'] = $annotation->getValue();
         }
         if ($annotation instanceof Description) {
@@ -298,8 +298,8 @@ class AnnotationReaderTest extends TestCase
     }
 
     /**
-     * @LegacyTitle("a")
-     * @LegacyTitle("b")
+     * @Title("a")
+     * @Title("b")
      * @LegacyDescription("c")
      */
     protected function demoOnlyLegacyAnnotations(): void
@@ -307,8 +307,8 @@ class AnnotationReaderTest extends TestCase
     }
 
     /**
-     * @LegacyTitle("a")
-     * @LegacyTitle("b")
+     * @Title("a")
+     * @Title("b")
      * @LegacyDescription("c")
      */
     #[Story("d")]

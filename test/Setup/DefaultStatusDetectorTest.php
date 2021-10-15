@@ -18,7 +18,7 @@ class DefaultStatusDetectorTest extends TestCase
     public function testGetStatus_Always_ReturnsFailedStatus(): void
     {
         $detector = new DefaultStatusDetector();
-        self::assertSame(Status::failed(), $detector->getStatus(new Exception()));
+        self::assertSame(Status::broken(), $detector->getStatus(new Exception()));
     }
 
     public function testGetStatusDetails_GivenError_ReturnsMatchingDetails(): void

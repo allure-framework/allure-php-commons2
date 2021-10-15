@@ -276,9 +276,11 @@ class LabelTest extends TestCase
         self::assertSame('language', Label::language(null)->getName());
     }
 
-    public function testLanguage_GivenNull_ResultHasNullValue(): void
+    public function testLanguage_GivenNull_ResultIsPhpWithCurrentVersion(): void
     {
-        self::assertNull(Label::language(null)->getValue());
+        $value = Label::language(null)->getValue();
+        self::assertIsString($value);
+        self::assertMatchesRegularExpression('#^PHP \d+\.\d+$#', $value);
     }
 
     public function testLanguage_GivenNotNull_ResultHasSameValue(): void

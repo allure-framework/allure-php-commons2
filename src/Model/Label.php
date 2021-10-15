@@ -6,6 +6,10 @@ namespace Qameta\Allure\Model;
 
 use JsonSerializable;
 
+use function preg_match;
+
+use const PHP_VERSION;
+
 final class Label implements JsonSerializable
 {
     use JsonSerializableTrait;
@@ -175,8 +179,17 @@ final class Label implements JsonSerializable
     {
         return new self(
             name: self::LANGUAGE,
-            value: $value,
+            value: $value ?? self::buildPhpVersion(),
         );
+    }
+
+    private static function buildPhpVersion(): string
+    {
+        $version = 1 === preg_match('#^\d+\.\d+#', PHP_VERSION, $matches)
+            ? $matches[0]
+            : '?.?';
+
+        return "PHP $version";
     }
 
     public function getName(): ?string

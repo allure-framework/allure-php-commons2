@@ -209,16 +209,6 @@ final class Allure
         self::getInstance()->doLabel(Label::package($value));
     }
 
-    public static function framework(string $value): void
-    {
-        self::getInstance()->doLabel(Label::framework($value));
-    }
-
-    public static function language(string $value): void
-    {
-        self::getInstance()->doLabel(Label::language($value));
-    }
-
     public static function label(string $name, string $value): void
     {
         self::getInstance()->doLabel(
@@ -247,12 +237,12 @@ final class Allure
         );
     }
 
-    public static function issue(string $name, string $url): void
+    public static function issue(string $name, ?string $url = null): void
     {
         self::getInstance()->doLink(Link::issue($name, $url));
     }
 
-    public static function tms(string $name, string $url): void
+    public static function tms(string $name, ?string $url = null): void
     {
         self::getInstance()->doLink(Link::tms($name, $url));
     }
@@ -265,6 +255,13 @@ final class Allure
                 url: $url,
                 type: $type ?? LinkType::custom(),
             ),
+        );
+    }
+
+    public static function displayName(string $name): void
+    {
+        self::getLifecycle()->updateExecutionContext(
+            fn (ExecutionContextInterface $context) => $context->setName($name),
         );
     }
 
@@ -376,7 +373,7 @@ final class Allure
             $parser = $this->readCallableAttributes($callable);
             $this->doGetLifecycle()->updateStep(
                 fn (StepResult $s): StepResult => $s
-                    ->setName($name ?? $parser->getTitle() ?? $this->defaultStepName)
+                    ->setName($name ?? $parser->getDisplayName() ?? $this->defaultStepName)
                     ->addParameters(...$parser->getParameters()),
                 $step->getUuid(),
             );
