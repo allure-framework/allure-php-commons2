@@ -18,8 +18,9 @@ use ReflectionProperty;
 use function array_merge;
 use function is_string;
 
-class AttributeParser implements ModelProviderInterface
+final class AttributeParser implements ModelProviderInterface
 {
+    use Model\ModelProviderTrait;
 
     private ?string $displayName = null;
 
@@ -184,14 +185,6 @@ class AttributeParser implements ModelProviderInterface
     public function getParameters(): array
     {
         return $this->parameters;
-    }
-
-    /**
-     * @deprecated Please use {@see getDisplayName()} method.
-     */
-    public function getTitle(): ?string
-    {
-        return $this->getDisplayName();
     }
 
     public function getDisplayName(): ?string

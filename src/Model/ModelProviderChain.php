@@ -100,4 +100,14 @@ final class ModelProviderChain implements ModelProviderInterface
 
         return $descriptionHtml;
     }
+
+    public function getFullName(): ?string
+    {
+        $fullName = null;
+        foreach ($this->providers as $provider) {
+            $fullName ??= $provider->getFullName();
+        }
+
+        return $fullName;
+    }
 }
