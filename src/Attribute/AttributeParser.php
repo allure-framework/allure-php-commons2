@@ -9,6 +9,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Qameta\Allure\Exception\InvalidMethodNameException;
 use Qameta\Allure\Model;
 use Qameta\Allure\Model\ModelProviderInterface;
+use Qameta\Allure\Setup\LinkTemplateCollection;
+use Qameta\Allure\Setup\LinkTemplateCollectionInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
@@ -44,12 +46,12 @@ final class AttributeParser implements ModelProviderInterface
     private array $parameters = [];
 
     /**
-     * @param array<AttributeInterface>            $attributes
-     * @param array<string, LinkTemplateInterface> $linkTemplates
+     * @param array<AttributeInterface>       $attributes
+     * @param LinkTemplateCollectionInterface $linkTemplates
      */
     public function __construct(
         array $attributes,
-        private array $linkTemplates = [],
+        private LinkTemplateCollectionInterface $linkTemplates,
     ) {
         $this->processAnnotations(...$attributes);
     }
@@ -58,7 +60,7 @@ final class AttributeParser implements ModelProviderInterface
      * @param class-string|object|null             $classOrObject
      * @param callable-string|Closure|null         $methodOrFunction
      * @param string|null                          $property
-     * @param array<string, LinkTemplateInterface> $linkTemplates
+     * @param LinkTemplateCollectionInterface|null $linkTemplates
      * @return list<ModelProviderInterface>
      * @throws ReflectionException
      */
@@ -66,7 +68,7 @@ final class AttributeParser implements ModelProviderInterface
         string|object|null $classOrObject,
         string|Closure|null $methodOrFunction = null,
         ?string $property = null,
-        array $linkTemplates = [],
+        ?LinkTemplateCollectionInterface $linkTemplates = null,
     ): array {
         $reader = new LegacyAttributeReader(
             new AnnotationReader(),
@@ -97,7 +99,7 @@ final class AttributeParser implements ModelProviderInterface
         return [
             new self(
                 array_merge(...$annotations),
-                $linkTemplates,
+                $linkTemplates ?? new LinkTemplateCollection(),
             )
         ];
     }
@@ -129,20 +131,13 @@ final class AttributeParser implements ModelProviderInterface
 
     private function createLink(LinkInterface $link): Model\Link
     {
-        $linkType = $link->getType();
+        $linkType = Model\LinkType::fromOptionalString($link->getType());
 
         return new Model\Link(
             name: $link->getName(),
-            url: $link->getUrl() ?? $this->getLinkUrl($link->getName(), $linkType),
-            type: Model\LinkType::fromOptionalString($linkType),
+            url: $link->getUrl() ?? $this->linkTemplates->getLinkTemplate($linkType)?->buildUrl($link->getName()),
+            type: $linkType,
         );
-    }
-
-    private function getLinkUrl(?string $name, ?string $type): ?string
-    {
-        return isset($type, $this->linkTemplates[$type])
-            ? $this->linkTemplates[$type]->buildUrl($name)
-            : $name;
     }
 
     /**

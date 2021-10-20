@@ -75,24 +75,11 @@ class AllureTest extends TestCase
         self::assertInstanceOf(LifecycleBuilder::class, Allure::getLifecycleConfigurator());
     }
 
-    public function testGetResultFactory_BuilderProvidesResultFactory_ReturnsSameFactory(): void
+    public function testGetConfig_ConstructedWithBuilder_ReturnsSameInstance(): void
     {
-        $resultFactory = $this->createStub(ResultFactoryInterface::class);
-        Allure::setLifecycleBuilder(
-            $this->createLifecycleBuilder($resultFactory),
-        );
-        self::assertSame($resultFactory, Allure::getResultFactory());
-    }
-
-    public function testGetStatusDetector_BuilderProvidesStatusDetector_ReturnsSameDetector(): void
-    {
-        $statusDetector = $this->createStub(StatusDetectorInterface::class);
-        $builder = $this->createStub(LifecycleBuilderInterface::class);
-        $builder
-            ->method('getStatusDetector')
-            ->willReturn($statusDetector);
+        $builder = $this->createLifecycleBuilder();
         Allure::setLifecycleBuilder($builder);
-        self::assertSame($statusDetector, Allure::getStatusDetector());
+        self::assertSame($builder, Allure::getConfig());
     }
 
     public function testGetLifecycle_BuilderProvidesLifecycle_ReturnsSameLifecycle(): void

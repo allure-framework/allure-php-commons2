@@ -11,4 +11,6 @@ interface LifecycleConfigInterface
     public function getResultFactory(): ResultFactoryInterface;
 
     public function getStatusDetector(): StatusDetectorInterface;
+
+    public function getLinkTemplates(): LinkTemplateCollectionInterface;
 }

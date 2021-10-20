@@ -7,6 +7,7 @@ namespace Qameta\Allure\Setup;
 use Psr\Log\LoggerInterface;
 use Qameta\Allure\Hook\LifecycleHookInterface;
 use Qameta\Allure\Io\ClockInterface;
+use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\ResultFactoryInterface;
 use Ramsey\Uuid\UuidFactoryInterface;
 
@@ -27,4 +28,6 @@ interface LifecycleConfiguratorInterface
         LifecycleHookInterface $hook,
         LifecycleHookInterface ...$moreHooks,
     ): self;
+
+    public function addLinkTemplate(LinkType $type, LinkTemplateInterface $template): self;
 }

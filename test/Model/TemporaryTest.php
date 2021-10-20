@@ -11,10 +11,12 @@ use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Parameter as AttrParameter;
 use Qameta\Allure\Io\ClockInterface;
 use Qameta\Allure\Model\Label;
+use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\Parameter;
 use Qameta\Allure\Model\Severity;
 use Qameta\Allure\Model\Status;
 use Qameta\Allure\Model\StatusDetails;
+use Qameta\Allure\Setup\LinkTemplate;
 use Qameta\Allure\StepContextInterface;
 use RuntimeException;
 use Throwable;
@@ -53,8 +55,9 @@ class TemporaryTest extends TestCase
             );
         Allure::getLifecycleConfigurator()
             ->setLogger($logger)
-            ->setClock($clock);
-        $resultFactory = Allure::getResultFactory();
+            ->setClock($clock)
+            ->addLinkTemplate(LinkType::issue(), new LinkTemplate('https://example.org/issue/%s'));
+        $resultFactory = Allure::getConfig()->getResultFactory();
         $lifecycle = Allure::getLifecycle();
         $container = $resultFactory->createContainer();
         $lifecycle->startContainer($container);
@@ -103,7 +106,7 @@ class TemporaryTest extends TestCase
         Allure::feature('Feature label');
         Allure::feature('Another feature label');
         Allure::story('Story label');
-        Allure::issue('Issue', 'https://example.com');
+        Allure::issue('C123');
         Allure::tms('TMS', 'https://example.com');
         Allure::link('Custom', 'https://example.com');
         Allure::description('Test description');
