@@ -238,7 +238,7 @@ final class Allure
                 $url ?? self::getInstance()
                     ->getLifecycleConfig()
                     ->getLinkTemplates()
-                    ->getLinkTemplate(LinkType::issue())
+                    ->get(LinkType::issue())
                     ?->buildUrl($name),
             ),
         );
@@ -252,7 +252,7 @@ final class Allure
                 $url ?? self::getInstance()
                     ->getLifecycleConfig()
                     ->getLinkTemplates()
-                    ->getLinkTemplate(LinkType::tms())
+                    ->get(LinkType::tms())
                     ?->buildUrl($name),
             ),
         );

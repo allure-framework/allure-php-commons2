@@ -17,7 +17,7 @@ final class LinkTemplateCollection implements LinkTemplateCollectionInterface
     ) {
     }
 
-    public function getLinkTemplate(LinkType $type): ?LinkTemplateInterface
+    public function get(LinkType $type): ?LinkTemplateInterface
     {
         return $this->templateLinks[(string) $type] ?? null;
     }

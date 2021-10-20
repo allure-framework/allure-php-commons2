@@ -135,7 +135,7 @@ final class AttributeParser implements ModelProviderInterface
 
         return new Model\Link(
             name: $link->getName(),
-            url: $link->getUrl() ?? $this->linkTemplates->getLinkTemplate($linkType)?->buildUrl($link->getName()),
+            url: $link->getUrl() ?? $this->linkTemplates->get($linkType)?->buildUrl($link->getName()),
             type: $linkType,
         );
     }

@@ -9,5 +9,5 @@ use Qameta\Allure\Model\LinkType;
 interface LinkTemplateCollectionInterface
 {
 
-    public function getLinkTemplate(LinkType $type): ?LinkTemplateInterface;
+    public function get(LinkType $type): ?LinkTemplateInterface;
 }
