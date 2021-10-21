@@ -9,6 +9,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Qameta\Allure\Exception\InvalidMethodNameException;
 use Qameta\Allure\Model;
 use Qameta\Allure\Model\ModelProviderInterface;
+use Qameta\Allure\Setup\LinkTemplateCollection;
+use Qameta\Allure\Setup\LinkTemplateCollectionInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
@@ -18,8 +20,9 @@ use ReflectionProperty;
 use function array_merge;
 use function is_string;
 
-class AttributeParser implements ModelProviderInterface
+final class AttributeParser implements ModelProviderInterface
 {
+    use Model\ModelProviderTrait;
 
     private ?string $displayName = null;
 
@@ -43,12 +46,12 @@ class AttributeParser implements ModelProviderInterface
     private array $parameters = [];
 
     /**
-     * @param array<AttributeInterface>            $attributes
-     * @param array<string, LinkTemplateInterface> $linkTemplates
+     * @param array<AttributeInterface>       $attributes
+     * @param LinkTemplateCollectionInterface $linkTemplates
      */
     public function __construct(
         array $attributes,
-        private array $linkTemplates = [],
+        private LinkTemplateCollectionInterface $linkTemplates,
     ) {
         $this->processAnnotations(...$attributes);
     }
@@ -57,7 +60,7 @@ class AttributeParser implements ModelProviderInterface
      * @param class-string|object|null             $classOrObject
      * @param callable-string|Closure|null         $methodOrFunction
      * @param string|null                          $property
-     * @param array<string, LinkTemplateInterface> $linkTemplates
+     * @param LinkTemplateCollectionInterface|null $linkTemplates
      * @return list<ModelProviderInterface>
      * @throws ReflectionException
      */
@@ -65,7 +68,7 @@ class AttributeParser implements ModelProviderInterface
         string|object|null $classOrObject,
         string|Closure|null $methodOrFunction = null,
         ?string $property = null,
-        array $linkTemplates = [],
+        ?LinkTemplateCollectionInterface $linkTemplates = null,
     ): array {
         $reader = new LegacyAttributeReader(
             new AnnotationReader(),
@@ -96,7 +99,7 @@ class AttributeParser implements ModelProviderInterface
         return [
             new self(
                 array_merge(...$annotations),
-                $linkTemplates,
+                $linkTemplates ?? new LinkTemplateCollection(),
             )
         ];
     }
@@ -128,20 +131,13 @@ class AttributeParser implements ModelProviderInterface
 
     private function createLink(LinkInterface $link): Model\Link
     {
-        $linkType = $link->getType();
+        $linkType = Model\LinkType::fromOptionalString($link->getType());
 
         return new Model\Link(
             name: $link->getName(),
-            url: $link->getUrl() ?? $this->getLinkUrl($link->getName(), $linkType),
-            type: Model\LinkType::fromOptionalString($linkType),
+            url: $link->getUrl() ?? $this->linkTemplates->get($linkType)?->buildUrl($link->getName()),
+            type: $linkType,
         );
-    }
-
-    private function getLinkUrl(?string $name, ?string $type): ?string
-    {
-        return isset($type, $this->linkTemplates[$type])
-            ? $this->linkTemplates[$type]->buildUrl($name)
-            : $name;
     }
 
     /**
@@ -184,14 +180,6 @@ class AttributeParser implements ModelProviderInterface
     public function getParameters(): array
     {
         return $this->parameters;
-    }
-
-    /**
-     * @deprecated Please use {@see getDisplayName()} method.
-     */
-    public function getTitle(): ?string
-    {
-        return $this->getDisplayName();
     }
 
     public function getDisplayName(): ?string

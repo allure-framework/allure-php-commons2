@@ -22,14 +22,11 @@ interface ModelProviderInterface
      */
     public function getParameters(): array;
 
-    /**
-     * @deprecated Please use {@see getDisplayName()} method.
-     */
-    public function getTitle(): ?string;
-
     public function getDisplayName(): ?string;
 
     public function getDescription(): ?string;
 
     public function getDescriptionHtml(): ?string;
+
+    public function getFullName(): ?string;
 }

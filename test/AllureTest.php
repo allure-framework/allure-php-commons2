@@ -10,14 +10,12 @@ use Qameta\Allure\Allure;
 use Qameta\Allure\AllureLifecycleInterface;
 use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Parameter;
-use Qameta\Allure\Attribute\Title;
 use Qameta\Allure\Exception\OutputDirectorySetFailureException;
 use Qameta\Allure\Internal\LifecycleBuilder;
 use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Io\StreamDataSource;
 use Qameta\Allure\Io\StringDataSource;
 use Qameta\Allure\Model\AttachmentResult;
-use Qameta\Allure\Model\FixtureResult;
 use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\ParameterMode;
 use Qameta\Allure\Model\ResultFactoryInterface;
@@ -77,24 +75,11 @@ class AllureTest extends TestCase
         self::assertInstanceOf(LifecycleBuilder::class, Allure::getLifecycleConfigurator());
     }
 
-    public function testGetResultFactory_BuilderProvidesResultFactory_ReturnsSameFactory(): void
+    public function testGetConfig_ConstructedWithBuilder_ReturnsSameInstance(): void
     {
-        $resultFactory = $this->createStub(ResultFactoryInterface::class);
-        Allure::setLifecycleBuilder(
-            $this->createLifecycleBuilder($resultFactory),
-        );
-        self::assertSame($resultFactory, Allure::getResultFactory());
-    }
-
-    public function testGetStatusDetector_BuilderProvidesStatusDetector_ReturnsSameDetector(): void
-    {
-        $statusDetector = $this->createStub(StatusDetectorInterface::class);
-        $builder = $this->createStub(LifecycleBuilderInterface::class);
-        $builder
-            ->method('getStatusDetector')
-            ->willReturn($statusDetector);
+        $builder = $this->createLifecycleBuilder();
         Allure::setLifecycleBuilder($builder);
-        self::assertSame($statusDetector, Allure::getStatusDetector());
+        self::assertSame($builder, Allure::getConfig());
     }
 
     public function testGetLifecycle_BuilderProvidesLifecycle_ReturnsSameLifecycle(): void

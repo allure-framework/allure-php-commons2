@@ -13,10 +13,15 @@ use Qameta\Allure\Io\ClockInterface;
 use Qameta\Allure\Io\FileSystemResultsWriter;
 use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Io\SystemClock;
+use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\ResultFactory;
 use Qameta\Allure\Model\ResultFactoryInterface;
 use Qameta\Allure\Setup\DefaultStatusDetector;
 use Qameta\Allure\Setup\LifecycleBuilderInterface;
+use Qameta\Allure\Setup\LifecycleConfiguratorInterface;
+use Qameta\Allure\Setup\LinkTemplateCollection;
+use Qameta\Allure\Setup\LinkTemplateCollectionInterface;
+use Qameta\Allure\Setup\LinkTemplateInterface;
 use Qameta\Allure\Setup\StatusDetectorInterface;
 use Ramsey\Uuid\UuidFactory;
 use Ramsey\Uuid\UuidFactoryInterface;
@@ -38,6 +43,13 @@ final class LifecycleBuilder implements LifecycleBuilderInterface
      * @var list<LifecycleHookInterface>
      */
     private array $lifecycleHooks = [];
+
+    /**
+     * @var array<string, LinkTemplateInterface>
+     */
+    private array $linkTemplates = [];
+
+    private ?LinkTemplateCollectionInterface $linkTemplateCollection = null;
 
     private ?StatusDetectorInterface $statusDetector = null;
 
@@ -82,6 +94,18 @@ final class LifecycleBuilder implements LifecycleBuilderInterface
         $this->lifecycleHooks = [...$this->lifecycleHooks, $hook, ...array_values($moreHooks)];
 
         return $this;
+    }
+
+    public function addLinkTemplate(LinkType $type, LinkTemplateInterface $template): LifecycleConfiguratorInterface
+    {
+        $this->linkTemplates[(string) $type] = $template;
+
+        return $this;
+    }
+
+    public function getLinkTemplates(): LinkTemplateCollectionInterface
+    {
+        return $this->linkTemplateCollection ??= new LinkTemplateCollection($this->linkTemplates);
     }
 
     public function setStatusDetector(StatusDetectorInterface $statusDetector): self

@@ -6,7 +6,7 @@ namespace Qameta\Allure\Attribute;
 
 use Qameta\Allure\Model;
 
-class ParameterMode
+final class ParameterMode
 {
 
     public const HIDDEN = Model\ParameterMode::HIDDEN;

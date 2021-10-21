@@ -19,7 +19,6 @@ use Qameta\Allure\Model\Link;
 use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\Parameter;
 use Qameta\Allure\Model\ParameterMode;
-use Qameta\Allure\Model\ResultFactoryInterface;
 use Qameta\Allure\Model\Severity;
 use Qameta\Allure\Model\Status;
 use Qameta\Allure\Model\StepResult;
@@ -28,7 +27,6 @@ use Qameta\Allure\Setup\LifecycleBuilderInterface;
 use Qameta\Allure\Setup\LifecycleConfigInterface;
 use Qameta\Allure\Setup\LifecycleConfiguratorInterface;
 use Qameta\Allure\Setup\LifecycleFactoryInterface;
-use Qameta\Allure\Setup\StatusDetectorInterface;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionMethod;
@@ -72,14 +70,9 @@ final class Allure
         return self::getInstance()->getLifecycleBuilder();
     }
 
-    public static function getResultFactory(): ResultFactoryInterface
+    public static function getConfig(): LifecycleConfigInterface
     {
-        return self::getInstance()->getLifecycleConfig()->getResultFactory();
-    }
-
-    public static function getStatusDetector(): StatusDetectorInterface
-    {
-        return self::getInstance()->getLifecycleConfig()->getStatusDetector();
+        return self::getInstance()->getLifecycleConfig();
     }
 
     /**
@@ -239,12 +232,30 @@ final class Allure
 
     public static function issue(string $name, ?string $url = null): void
     {
-        self::getInstance()->doLink(Link::issue($name, $url));
+        self::getInstance()->doLink(
+            Link::issue(
+                $name,
+                $url ?? self::getInstance()
+                    ->getLifecycleConfig()
+                    ->getLinkTemplates()
+                    ->get(LinkType::issue())
+                    ?->buildUrl($name),
+            ),
+        );
     }
 
     public static function tms(string $name, ?string $url = null): void
     {
-        self::getInstance()->doLink(Link::tms($name, $url));
+        self::getInstance()->doLink(
+            Link::tms(
+                $name,
+                $url ?? self::getInstance()
+                    ->getLifecycleConfig()
+                    ->getLinkTemplates()
+                    ->get(LinkType::tms())
+                    ?->buildUrl($name),
+            ),
+        );
     }
 
     public static function link(string $url, ?string $name = null, ?LinkType $type = null): void
@@ -414,7 +425,7 @@ final class Allure
             $attributes = $attributeReader->getFunctionAnnotations(new ReflectionFunction($callable));
         }
 
-        return new AttributeParser($attributes);
+        return new AttributeParser($attributes, $this->getLifecycleConfig()->getLinkTemplates());
     }
 
     private function doLabel(Label $label): void

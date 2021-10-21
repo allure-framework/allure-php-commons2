@@ -313,4 +313,55 @@ class ModelProviderChainTest extends TestCase
         $chain = new ModelProviderChain($firstProvider, $secondProvider);
         self::assertSame('a', $chain->getDescriptionHtml());
     }
+
+    public function testGetFullName_ConstructedWithoutProviders_ReturnsNull(): void
+    {
+        $chain = new ModelProviderChain();
+        self::assertNull($chain->getFullName());
+    }
+
+    public function testGetFullName_BothProvidersProvideNullFullName_ReturnsNull(): void
+    {
+        $chain = new ModelProviderChain(
+            $this->createStub(ModelProviderInterface::class),
+            $this->createStub(ModelProviderInterface::class),
+        );
+        self::assertNull($chain->getFullName());
+    }
+
+    public function testGetFullName_OnlyFirstProviderProvidesNonNullValue_ReturnsSameValue(): void
+    {
+        $firstProvider = $this->createStub(ModelProviderInterface::class);
+        $firstProvider
+            ->method('getFullName')
+            ->willReturn('a');
+        $secondProvider = $this->createStub(ModelProviderInterface::class);
+        $chain = new ModelProviderChain($firstProvider, $secondProvider);
+        self::assertSame('a', $chain->getFullName());
+    }
+
+    public function testGetFullName_OnlySecondProviderProvidesNonNullValue_ReturnsSameName(): void
+    {
+        $firstProvider = $this->createStub(ModelProviderInterface::class);
+        $secondProvider = $this->createStub(ModelProviderInterface::class);
+        $secondProvider
+            ->method('getFullName')
+            ->willReturn('a');
+        $chain = new ModelProviderChain($firstProvider, $secondProvider);
+        self::assertSame('a', $chain->getFullName());
+    }
+
+    public function testGetFullName_BothProvidersProvideNonNullValue_ReturnsValueFromFirstProvider(): void
+    {
+        $firstProvider = $this->createStub(ModelProviderInterface::class);
+        $firstProvider
+            ->method('getFullName')
+            ->willReturn('a');
+        $secondProvider = $this->createStub(ModelProviderInterface::class);
+        $secondProvider
+            ->method('getFullName')
+            ->willReturn('b');
+        $chain = new ModelProviderChain($firstProvider, $secondProvider);
+        self::assertSame('a', $chain->getFullName());
+    }
 }
