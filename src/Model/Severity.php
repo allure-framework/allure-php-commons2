@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qameta\Allure\Model;
 
 use JsonSerializable;
+use Qameta\Allure\Model\Exception\InvalidSeverityException;
 
 final class Severity extends AbstractEnum implements JsonSerializable
 {
@@ -14,6 +15,18 @@ final class Severity extends AbstractEnum implements JsonSerializable
     public const NORMAL = "normal";
     public const MINOR = "minor";
     public const TRIVIAL = "trivial";
+
+    public static function fromString(string $value): self
+    {
+        return match ($value) {
+            self::BLOCKER,
+            self::CRITICAL,
+            self::NORMAL,
+            self::MINOR,
+            self::TRIVIAL => self::create($value),
+            default => throw new InvalidSeverityException($value),
+        };
+    }
 
     public static function blocker(): self
     {
