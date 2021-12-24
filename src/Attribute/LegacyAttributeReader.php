@@ -19,7 +19,6 @@ use function is_array;
 
 final class LegacyAttributeReader implements AttributeReaderInterface
 {
-
     private Reader $legacyDelegate;
 
     public function __construct(

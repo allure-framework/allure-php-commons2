@@ -10,7 +10,6 @@ use Throwable;
 
 final class InvalidExecutionContextException extends DomainException
 {
-
     public function __construct(
         private ExecutionContextInterface $context,
         ?Throwable $previous = null,

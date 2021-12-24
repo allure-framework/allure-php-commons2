@@ -11,7 +11,6 @@ use ReflectionProperty;
 
 interface AttributeReaderInterface
 {
-
     /**
      * @param ReflectionClass $class
      * @param class-string|null     $name

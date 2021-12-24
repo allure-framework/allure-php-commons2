@@ -8,7 +8,6 @@ use Qameta\Allure\Model;
 
 final class ParameterMode
 {
-
     public const HIDDEN = Model\ParameterMode::HIDDEN;
     public const MASKED = Model\ParameterMode::MASKED;
 }

@@ -8,6 +8,5 @@ use Qameta\Allure\Model\ContainerResult;
 
 interface AfterContainerWriteHookInterface extends LifecycleHookInterface
 {
-
     public function afterContainerWrite(ContainerResult $container): void;
 }

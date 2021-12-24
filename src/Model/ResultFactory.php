@@ -8,7 +8,6 @@ use Ramsey\Uuid\UuidFactoryInterface;
 
 final class ResultFactory implements ResultFactoryInterface
 {
-
     public function __construct(private UuidFactoryInterface $uuidFactory)
     {
     }

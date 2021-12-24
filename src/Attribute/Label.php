@@ -10,7 +10,6 @@ use Qameta\Allure\Model;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class Label extends AbstractLabel
 {
-
     public const ALLURE_ID = Model\Label::ALLURE_ID;
     public const SUITE = Model\Label::SUITE;
     public const PARENT_SUITE = Model\Label::PARENT_SUITE;

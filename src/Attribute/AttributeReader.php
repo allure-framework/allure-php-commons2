@@ -18,7 +18,6 @@ use function is_a;
 
 final class AttributeReader implements AttributeReaderInterface
 {
-
     /**
      * @param ReflectionClass $class
      * @param class-string|null     $name

@@ -15,7 +15,6 @@ use Yandex\Allure\Adapter\Model\SeverityLevel;
  */
 class Severity implements LegacyAnnotationInterface
 {
-
     /**
      * @psalm-suppress DeprecatedClass
      */

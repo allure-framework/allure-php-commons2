@@ -6,7 +6,6 @@ namespace Qameta\Allure\Model;
 
 final class FixtureResult extends ExecutionContext
 {
-
     public function getResultType(): ResultType
     {
         return ResultType::fixture();

@@ -18,7 +18,6 @@ use Qameta\Allure\Model\TestResult;
  */
 class ResultStorage implements ResultStorageInterface
 {
-
     /**
      * @var array<string, StorableResultInterface>
      */

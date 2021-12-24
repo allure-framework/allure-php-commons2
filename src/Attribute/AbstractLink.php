@@ -6,7 +6,6 @@ namespace Qameta\Allure\Attribute;
 
 abstract class AbstractLink implements LinkInterface
 {
-
     public function __construct(
         private ?string $name = null,
         private ?string $url = null,

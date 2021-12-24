@@ -10,7 +10,6 @@ use Throwable;
 
 interface StatusDetectorInterface
 {
-
     public function getStatus(Throwable $error): ?Status;
 
     public function getStatusDetails(Throwable $error): ?StatusDetails;

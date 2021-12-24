@@ -8,7 +8,6 @@ use function array_pop;
 
 final class ThreadContext implements ThreadContextInterface
 {
-
     private const DEFAULT_THREAD = '__default';
 
     /**

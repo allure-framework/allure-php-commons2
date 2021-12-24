@@ -23,7 +23,6 @@ use Throwable;
 
 class TemporaryTest extends TestCase
 {
-
     public static function setUpBeforeClass(): void
     {
         Allure::reset();

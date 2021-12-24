@@ -9,7 +9,6 @@ use function array_values;
 
 final class ContainerResult extends StorableResult
 {
-
     /**
      * @var list<TestResult>
      */

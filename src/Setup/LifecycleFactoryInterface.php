@@ -9,7 +9,6 @@ use Qameta\Allure\Io\ResultsWriterInterface;
 
 interface LifecycleFactoryInterface
 {
-
     public function createLifecycle(ResultsWriterInterface $resultsWriter): AllureLifecycleInterface;
 
     public function createResultsWriter(string $outputDirectory): ResultsWriterInterface;

@@ -6,7 +6,6 @@ namespace Qameta\Allure\Attribute;
 
 abstract class AbstractParameter implements ParameterInterface
 {
-
     public function __construct(
         private string $name,
         private ?string $value,

@@ -19,7 +19,6 @@ use const JSON_THROW_ON_ERROR;
  */
 class SeverityTest extends TestCase
 {
-
     public function testFromString_InvalidValue_ThrowsException(): void
     {
         $this->expectException(InvalidSeverityException::class);

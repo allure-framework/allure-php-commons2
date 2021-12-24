@@ -9,7 +9,6 @@ use Throwable;
 
 final class InvalidSeverityException extends DomainException
 {
-
     public function __construct(private string $severity, Throwable $previous = null)
     {
         parent::__construct("Invalid severity: $this->severity", 0, $previous);

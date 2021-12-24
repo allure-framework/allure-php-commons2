@@ -8,7 +8,6 @@ use DateTimeImmutable;
 
 interface StorableResultInterface extends ResultInterface
 {
-
     public function getName(): ?string;
 
     public function setName(?string $name): static;

@@ -21,7 +21,6 @@ use function fread;
  */
 class AttachmentSupportTest extends TestCase
 {
-
     public function setUp(): void
     {
         Allure::reset();

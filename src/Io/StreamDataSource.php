@@ -12,7 +12,6 @@ use function fopen;
 
 final class StreamDataSource implements DataSourceInterface
 {
-
     public function __construct(private string $link)
     {
     }

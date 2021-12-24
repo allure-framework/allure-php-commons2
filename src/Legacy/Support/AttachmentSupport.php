@@ -15,7 +15,6 @@ use function is_file;
  */
 trait AttachmentSupport
 {
-
     /**
      * Adds a new attachment to report
      *

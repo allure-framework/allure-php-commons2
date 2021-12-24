@@ -16,7 +16,6 @@ use Qameta\Allure\Model\Parameter;
  */
 class ModelProviderChainTest extends TestCase
 {
-
     public function testGetLinks_ConstructedWithoutProviders_ReturnsEmptyList(): void
     {
         $chain = new ModelProviderChain();

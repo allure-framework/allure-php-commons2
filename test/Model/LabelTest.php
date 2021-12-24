@@ -19,7 +19,6 @@ use const JSON_THROW_ON_ERROR;
  */
 class LabelTest extends TestCase
 {
-
     public function testId_Always_ResultHasAsIdName(): void
     {
         self::assertSame('AS_ID', Label::id(null)->getName());

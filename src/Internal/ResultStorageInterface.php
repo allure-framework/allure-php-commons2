@@ -16,7 +16,6 @@ use Qameta\Allure\Model\TestResult;
  */
 interface ResultStorageInterface
 {
-
     public function set(StorableResultInterface $object): void;
 
     public function unset(string $uuid): void;

@@ -8,7 +8,6 @@ use Qameta\Allure\Model\ParameterMode;
 
 interface StepContextInterface
 {
-
     public function name(string $name): void;
 
     public function parameter(

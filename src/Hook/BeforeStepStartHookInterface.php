@@ -8,6 +8,5 @@ use Qameta\Allure\Model\StepResult;
 
 interface BeforeStepStartHookInterface extends LifecycleHookInterface
 {
-
     public function beforeStepStart(StepResult $step): void;
 }

@@ -30,7 +30,6 @@ use function array_values;
 
 final class LifecycleBuilder implements LifecycleBuilderInterface
 {
-
     private ?UuidFactoryInterface $uuidFactory = null;
 
     private ?LoggerInterface $logger = null;

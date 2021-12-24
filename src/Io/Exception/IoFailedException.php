@@ -9,7 +9,6 @@ use Throwable;
 
 final class IoFailedException extends RuntimeException
 {
-
     public function __construct(?string $message = null, Throwable $previous = null)
     {
         parent::__construct($this->buildMessage($message), 0, $previous);

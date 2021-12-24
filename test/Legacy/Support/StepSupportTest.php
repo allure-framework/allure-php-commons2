@@ -18,7 +18,6 @@ use Yandex\Allure\Adapter\Support\StepSupport;
  */
 class StepSupportTest extends TestCase
 {
-
     public function setUp(): void
     {
         Allure::reset();

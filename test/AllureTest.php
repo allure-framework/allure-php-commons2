@@ -36,7 +36,6 @@ use const STDOUT;
  */
 class AllureTest extends TestCase
 {
-
     public function setUp(): void
     {
         Allure::reset();

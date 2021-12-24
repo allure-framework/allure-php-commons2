@@ -36,7 +36,6 @@ use function is_array;
 
 final class Allure
 {
-
     private const DEFAULT_STEP_NAME = 'step';
 
     private static ?self $instance = null;

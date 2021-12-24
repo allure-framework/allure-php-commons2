@@ -15,7 +15,6 @@ use Qameta\Allure\StepContextInterface;
  */
 final class StepContext implements StepContextInterface
 {
-
     public function __construct(
         private AllureLifecycleInterface $lifecycle,
         private string $uuid,

@@ -10,7 +10,6 @@ use Throwable;
 
 final class StorableNotFoundException extends LogicException
 {
-
     public function __construct(
         private ResultType $resultType,
         private string $uuid,

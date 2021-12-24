@@ -13,7 +13,6 @@ use Qameta\Allure\Model\ResultType;
  */
 class ResultTypeTest extends TestCase
 {
-
     public function testUnknown_CalledTwice_ReturnsSameInstance(): void
     {
         $resultType = ResultType::unknown();

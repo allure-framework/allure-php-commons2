@@ -8,6 +8,5 @@ use Throwable;
 
 interface OnLifecycleErrorHookInterface extends LifecycleHookInterface
 {
-
     public function onLifecycleError(Throwable $error): void;
 }

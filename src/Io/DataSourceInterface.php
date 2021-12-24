@@ -6,7 +6,6 @@ namespace Qameta\Allure\Io;
 
 interface DataSourceInterface
 {
-
     /**
      * @return resource
      */

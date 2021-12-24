@@ -16,7 +16,6 @@ use function stream_get_contents;
  */
 class StringDataSourceTest extends TestCase
 {
-
     /**
      * @var list<resource>
      */

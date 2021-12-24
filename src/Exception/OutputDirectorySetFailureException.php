@@ -9,7 +9,6 @@ use Throwable;
 
 final class OutputDirectorySetFailureException extends LogicException
 {
-
     public function __construct(Throwable $previous = null)
     {
         parent::__construct(

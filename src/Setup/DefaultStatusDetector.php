@@ -10,7 +10,6 @@ use Throwable;
 
 final class DefaultStatusDetector implements StatusDetectorInterface
 {
-
     public function getStatus(Throwable $error): ?Status
     {
         return Status::broken();

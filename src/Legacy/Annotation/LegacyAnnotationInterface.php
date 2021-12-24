@@ -8,7 +8,6 @@ use Qameta\Allure\Attribute\AttributeInterface;
 
 interface LegacyAnnotationInterface
 {
-
     /**
      * @return list<AttributeInterface>|AttributeInterface
      */

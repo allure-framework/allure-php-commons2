@@ -8,7 +8,6 @@ use JsonSerializable;
 
 final class LinkType extends AbstractEnum implements JsonSerializable
 {
-
     public const ISSUE = "issue";
     public const TMS = "tms";
     public const CUSTOM = "custom";

@@ -8,7 +8,6 @@ use Qameta\Allure\Model\LinkType;
 
 final class LinkTemplateCollection implements LinkTemplateCollectionInterface
 {
-
     /**
      * @param array<string, LinkTemplateInterface> $templateLinks
      */

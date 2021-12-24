@@ -16,7 +16,6 @@ use function usleep;
  */
 class SystemClockTest extends TestCase
 {
-
     public function testTime_CalledTwiceAfterPeriod_ResultsDifferenceIsSameAsPeriod(): void
     {
         $clock = new SystemClock();

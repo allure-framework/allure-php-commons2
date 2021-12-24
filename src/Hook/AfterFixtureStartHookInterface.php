@@ -8,6 +8,5 @@ use Qameta\Allure\Model\FixtureResult;
 
 interface AfterFixtureStartHookInterface extends LifecycleHookInterface
 {
-
     public function afterFixtureStart(FixtureResult $fixture): void;
 }

@@ -8,7 +8,6 @@ use JsonSerializable;
 
 final class Stage extends AbstractEnum implements JsonSerializable
 {
-
     private const SCHEDULED = 'scheduled';
     private const RUNNING = 'running';
     private const FINISHED = 'finished';

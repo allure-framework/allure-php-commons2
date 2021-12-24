@@ -8,7 +8,6 @@ use JsonSerializable;
 
 interface ResultInterface extends JsonSerializable
 {
-
     public function getUuid(): string;
 
     public function getResultType(): ResultType;

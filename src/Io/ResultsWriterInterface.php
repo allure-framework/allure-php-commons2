@@ -10,7 +10,6 @@ use Qameta\Allure\Model\TestResult;
 
 interface ResultsWriterInterface
 {
-
     public function writeContainer(ContainerResult $container): void;
 
     public function writeTest(TestResult $test): void;

@@ -6,7 +6,6 @@ namespace Qameta\Allure\Attribute;
 
 abstract class AbstractDescription implements DescriptionInterface
 {
-
     public function __construct(
         private string $value,
         private bool $isHtml,

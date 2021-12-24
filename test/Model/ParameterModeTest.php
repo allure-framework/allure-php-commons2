@@ -18,7 +18,6 @@ use const JSON_THROW_ON_ERROR;
  */
 class ParameterModeTest extends TestCase
 {
-
     public function testMasked_CalledTwice_ReturnsSameInstance(): void
     {
         $mode = ParameterMode::masked();

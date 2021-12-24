@@ -6,7 +6,6 @@ namespace Qameta\Allure\Internal;
 
 interface ThreadContextInterface
 {
-
     public function switchThread(?string $thread): ThreadContextInterface;
 
     public function reset(): ThreadContextInterface;

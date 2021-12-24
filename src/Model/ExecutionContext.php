@@ -8,7 +8,6 @@ use function array_values;
 
 abstract class ExecutionContext extends StorableResult implements ExecutionContextInterface
 {
-
     protected ?Status $status = null;
 
     protected ?StatusDetails $statusDetails = null;

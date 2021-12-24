@@ -6,7 +6,6 @@ namespace Qameta\Allure\Attribute;
 
 abstract class AbstractLabel implements LabelInterface
 {
-
     public function __construct(
         private string $name,
         private ?string $value = null,

@@ -36,7 +36,6 @@ use Throwable;
  */
 class AllureLifecycleTest extends TestCase
 {
-
     /**
      * @dataProvider providerSwitchThread
      */

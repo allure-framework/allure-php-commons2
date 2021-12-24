@@ -9,7 +9,6 @@ use Qameta\Allure\Model\Exception\InvalidSeverityException;
 
 final class Severity extends AbstractEnum implements JsonSerializable
 {
-
     public const BLOCKER = "blocker";
     public const CRITICAL = "critical";
     public const NORMAL = "normal";

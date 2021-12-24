@@ -10,7 +10,6 @@ use Throwable;
 
 final class OutputDirectoryUndefinedException extends LogicException
 {
-
     public function __construct(?Throwable $previous = null)
     {
         $class = Allure::class;

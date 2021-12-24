@@ -14,7 +14,6 @@ use Qameta\Allure\Legacy\Annotation\LegacyAnnotationInterface;
  */
 final class AnotherLegacyPropertyAnnotation implements LegacyAnnotationInterface
 {
-
     /**
      * @var string
      * @Required
