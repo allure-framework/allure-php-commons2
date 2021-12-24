@@ -24,10 +24,7 @@ interface LifecycleConfiguratorInterface
 
     public function setClock(ClockInterface $clock): self;
 
-    public function addHooks(
-        LifecycleHookInterface $hook,
-        LifecycleHookInterface ...$moreHooks,
-    ): self;
+    public function addHooks(LifecycleHookInterface ...$hooks): self;
 
     public function addLinkTemplate(LinkType $type, LinkTemplateInterface $template): self;
 }

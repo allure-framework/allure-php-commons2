@@ -87,11 +87,9 @@ final class LifecycleBuilder implements LifecycleBuilderInterface
         );
     }
 
-    public function addHooks(
-        LifecycleHookInterface $hook,
-        LifecycleHookInterface ...$moreHooks,
-    ): self {
-        $this->lifecycleHooks = [...$this->lifecycleHooks, $hook, ...array_values($moreHooks)];
+    public function addHooks(LifecycleHookInterface ...$hooks): self
+    {
+        $this->lifecycleHooks = [...$this->lifecycleHooks, ...array_values($hooks)];
 
         return $this;
     }
