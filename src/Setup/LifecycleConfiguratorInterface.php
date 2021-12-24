@@ -13,6 +13,8 @@ use Ramsey\Uuid\UuidFactoryInterface;
 
 interface LifecycleConfiguratorInterface
 {
+    public function setOutputDirectory(string $outputDirectory): self;
+
     public function setResultFactory(ResultFactoryInterface $resultFactory): self;
 
     public function setStatusDetector(StatusDetectorInterface $statusDetector): self;

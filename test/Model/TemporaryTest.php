@@ -26,7 +26,7 @@ class TemporaryTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         Allure::reset();
-        Allure::setOutputDirectory(__DIR__ . '/../../build/allure');
+        Allure::getLifecycleConfigurator()->setOutputDirectory(__DIR__ . '/../../build/allure');
     }
 
     /**

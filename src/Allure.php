@@ -7,7 +7,6 @@ namespace Qameta\Allure;
 use Closure;
 use Qameta\Allure\Attribute\AttributeParser;
 use Qameta\Allure\Attribute\AttributeReader;
-use Qameta\Allure\Exception\OutputDirectorySetFailureException;
 use Qameta\Allure\Internal\StepContext;
 use Qameta\Allure\Internal\LifecycleBuilder;
 use Qameta\Allure\Io\DataSourceFactory;
@@ -42,8 +41,6 @@ final class Allure
 
     private ?LifecycleBuilderInterface $lifecycleBuilder = null;
 
-    private ?string $outputDirectory = null;
-
     private ?AllureLifecycleInterface $lifecycle = null;
 
     private string $defaultStepName = self::DEFAULT_STEP_NAME;
@@ -59,9 +56,12 @@ final class Allure
         self::$instance = null;
     }
 
+    /**
+     * @deprecated Please use lifecycle configurator to set output directory.
+     */
     public static function setOutputDirectory(string $outputDirectory): void
     {
-        self::getInstance()->doSetOutputDirectory($outputDirectory);
+        self::getLifecycleConfigurator()->setOutputDirectory($outputDirectory);
     }
 
     public static function getLifecycleConfigurator(): LifecycleConfiguratorInterface
@@ -304,14 +304,6 @@ final class Allure
         self::getInstance()->lifecycleBuilder = $builder;
     }
 
-    private function doSetOutputDirectory(string $outputDirectory): void
-    {
-        if (isset($this->resultsWriter)) {
-            throw new OutputDirectorySetFailureException();
-        }
-        $this->outputDirectory = $outputDirectory;
-    }
-
     private function doGetLifecycle(): AllureLifecycleInterface
     {
         return $this->lifecycle ??= $this->getLifecycleFactory()->createLifecycle($this->getResultsWriter());
@@ -342,16 +334,11 @@ final class Allure
         return $this->getLifecycleBuilder();
     }
 
-    private function getOutputDirectory(): string
-    {
-        return $this->outputDirectory ?? throw new Exception\OutputDirectoryUndefinedException();
-    }
-
     private function getResultsWriter(): ResultsWriterInterface
     {
         return $this->resultsWriter ??= $this
             ->getLifecycleFactory()
-            ->createResultsWriter($this->getOutputDirectory());
+            ->createResultsWriter();
     }
 
     private function doAddStep(string $name, ?Status $status = null): void

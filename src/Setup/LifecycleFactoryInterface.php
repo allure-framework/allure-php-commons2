@@ -11,5 +11,5 @@ interface LifecycleFactoryInterface
 {
     public function createLifecycle(ResultsWriterInterface $resultsWriter): AllureLifecycleInterface;
 
-    public function createResultsWriter(string $outputDirectory): ResultsWriterInterface;
+    public function createResultsWriter(): ResultsWriterInterface;
 }
