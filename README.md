@@ -1,7 +1,7 @@
 # Allure PHP Commons
 
 [![Version](http://poser.pugx.org/allure-framework/allure-php-commons/version)](https://packagist.org/packages/allure-framework/allure-php-commons)
-[![Build](https://github.com/allure-framework/allure-php-commons2/actions/workflows/build.yml/badge.svg)](https://github.com/allure-framework/allure-php-commons/actions/workflows/build.yml)
+[![Build](https://github.com/allure-framework/allure-php-commons2/actions/workflows/build.yml/badge.svg)](https://github.com/allure-framework/allure-php-commons2/actions/workflows/build.yml)
 [![Type Coverage](https://shepherd.dev/github/allure-framework/allure-php-commons2/coverage.svg)](https://shepherd.dev/github/allure-framework/allure-php-commons2)
 [![Psalm Level](https://shepherd.dev/github/allure-framework/allure-php-commons2/level.svg)](https://shepherd.dev/github/allure-framework/allure-php-commons2)
 [![License](http://poser.pugx.org/allure-framework/allure-php-commons/license)](https://packagist.org/packages/allure-framework/allure-php-commons)

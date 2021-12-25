@@ -62,14 +62,6 @@ final class ModelProviderChain implements ModelProviderInterface
         );
     }
 
-    /**
-     * @deprecated Please use {@see getDisplayName()} method.
-     */
-    public function getTitle(): ?string
-    {
-        return $this->getDisplayName();
-    }
-
     public function getDisplayName(): ?string
     {
         $displayName = null;
