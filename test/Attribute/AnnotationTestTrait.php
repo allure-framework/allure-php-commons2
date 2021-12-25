@@ -15,7 +15,6 @@ use function array_map;
 
 trait AnnotationTestTrait
 {
-
     /**
      * @template T
      * @param class-string<T> $attributeClass

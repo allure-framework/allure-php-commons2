@@ -9,7 +9,6 @@ use Throwable;
 
 final class DirectoryNotCreatedException extends RuntimeException
 {
-
     public function __construct(
         private string $directory,
         ?string $message = null,

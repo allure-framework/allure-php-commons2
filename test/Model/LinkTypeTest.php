@@ -18,7 +18,6 @@ use const JSON_THROW_ON_ERROR;
  */
 class LinkTypeTest extends TestCase
 {
-
     public function testIssue_CalledTwice_ReturnsSameInstance(): void
     {
         $linkType = LinkType::issue();

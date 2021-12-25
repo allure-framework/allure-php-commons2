@@ -6,7 +6,6 @@ namespace Qameta\Allure\Model;
 
 final class AttachmentResult extends Result
 {
-
     protected ?string $name = null;
 
     protected ?string $source = null;

@@ -15,7 +15,6 @@ use const JSON_UNESCAPED_UNICODE;
 
 final class DataSourceFactory
 {
-
     private function __construct()
     {
     }

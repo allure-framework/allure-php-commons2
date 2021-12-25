@@ -21,7 +21,6 @@ use const ARRAY_FILTER_USE_KEY;
  */
 trait JsonSerializableTrait
 {
-
     /**
      * Returns JSON object that has all properties (except for those listed by {@see excludeFromSerialization()})
      * with {@see prepareForSerialization()} results as values.

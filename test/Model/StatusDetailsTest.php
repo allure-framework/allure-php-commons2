@@ -12,7 +12,6 @@ use Qameta\Allure\Model\StatusDetails;
  */
 class StatusDetailsTest extends TestCase
 {
-
     public function testIsKnown_ConstructedWithoutKnownValue_ReturnsNull(): void
     {
         $statusDetails = new StatusDetails();

@@ -8,6 +8,5 @@ use Qameta\Allure\Model\TestResult;
 
 interface BeforeTestUpdateHookInterface extends LifecycleHookInterface
 {
-
     public function beforeTestUpdate(TestResult $test): void;
 }

@@ -9,7 +9,6 @@ use Throwable;
 
 final class StreamOpenFailedException extends RuntimeException
 {
-
     public function __construct(
         private string $link,
         ?string $message = null,

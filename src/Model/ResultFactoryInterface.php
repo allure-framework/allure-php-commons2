@@ -6,7 +6,6 @@ namespace Qameta\Allure\Model;
 
 interface ResultFactoryInterface
 {
-
     public function createContainer(): ContainerResult;
 
     public function createTest(): TestResult;

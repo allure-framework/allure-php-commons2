@@ -6,7 +6,6 @@ namespace Qameta\Allure\Model;
 
 final class ResultType extends AbstractEnum
 {
-
     private const UNKNOWN = 'unknown';
     private const CONTAINER = 'container';
     private const FIXTURE = 'fixture';

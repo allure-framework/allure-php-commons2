@@ -8,6 +8,5 @@ use Qameta\Allure\Model\ContainerResult;
 
 interface BeforeContainerStopHookInterface extends LifecycleHookInterface
 {
-
     public function beforeContainerStop(ContainerResult $container): void;
 }

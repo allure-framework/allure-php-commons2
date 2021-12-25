@@ -12,7 +12,6 @@ use Throwable;
  */
 trait LoggerAwareTrait
 {
-
     private LoggerInterface $logger;
 
     private function logException(string $message, Throwable $exception, array $context = []): void

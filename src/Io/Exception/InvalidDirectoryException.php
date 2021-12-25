@@ -9,7 +9,6 @@ use Throwable;
 
 final class InvalidDirectoryException extends RuntimeException
 {
-
     public function __construct(
         private string $directory,
         Throwable $previous = null,

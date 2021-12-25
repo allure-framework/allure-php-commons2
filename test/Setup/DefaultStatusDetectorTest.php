@@ -14,7 +14,6 @@ use Qameta\Allure\Setup\DefaultStatusDetector;
  */
 class DefaultStatusDetectorTest extends TestCase
 {
-
     public function testGetStatus_Always_ReturnsFailedStatus(): void
     {
         $detector = new DefaultStatusDetector();

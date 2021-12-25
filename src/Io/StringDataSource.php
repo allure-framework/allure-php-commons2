@@ -21,7 +21,6 @@ use function rewind;
  */
 final class StringDataSource implements DataSourceInterface
 {
-
     public function __construct(private string $data)
     {
     }

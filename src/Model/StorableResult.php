@@ -8,7 +8,6 @@ use DateTimeImmutable;
 
 abstract class StorableResult extends Result implements StorableResultInterface
 {
-
     protected ?string $name = null;
 
     protected ?string $description = null;

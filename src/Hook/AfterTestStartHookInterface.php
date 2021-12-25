@@ -8,6 +8,5 @@ use Qameta\Allure\Model\TestResult;
 
 interface AfterTestStartHookInterface extends LifecycleHookInterface
 {
-
     public function afterTestStart(TestResult $test): void;
 }

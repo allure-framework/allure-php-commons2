@@ -13,6 +13,7 @@ use Ramsey\Uuid\UuidFactoryInterface;
 
 interface LifecycleConfiguratorInterface
 {
+    public function setOutputDirectory(string $outputDirectory): self;
 
     public function setResultFactory(ResultFactoryInterface $resultFactory): self;
 
@@ -24,10 +25,7 @@ interface LifecycleConfiguratorInterface
 
     public function setClock(ClockInterface $clock): self;
 
-    public function addHooks(
-        LifecycleHookInterface $hook,
-        LifecycleHookInterface ...$moreHooks,
-    ): self;
+    public function addHooks(LifecycleHookInterface ...$hooks): self;
 
     public function addLinkTemplate(LinkType $type, LinkTemplateInterface $template): self;
 }

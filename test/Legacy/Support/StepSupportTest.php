@@ -18,7 +18,6 @@ use Yandex\Allure\Adapter\Support\StepSupport;
  */
 class StepSupportTest extends TestCase
 {
-
     public function setUp(): void
     {
         Allure::reset();
@@ -33,7 +32,6 @@ class StepSupportTest extends TestCase
                 $this->createLifecycleWithUpdatableStep($step),
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -42,8 +40,8 @@ class StepSupportTest extends TestCase
             use StepSupport;
         };
 
-        $object->executeStep('c', fn (StepContextInterface $_) => null);
-        self::assertSame('c', $step->getName());
+        $object->executeStep('b', fn (StepContextInterface $_) => null);
+        self::assertSame('b', $step->getName());
     }
 
     public function testStepSupport_GivenNameWithTitle_StepNameEqualsToGivenTitle(): void
@@ -55,7 +53,6 @@ class StepSupportTest extends TestCase
                 $this->createLifecycleWithUpdatableStep($step),
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -64,8 +61,8 @@ class StepSupportTest extends TestCase
             use StepSupport;
         };
 
-        $object->executeStep('c', fn (StepContextInterface $_) => null, 'd');
-        self::assertSame('d', $step->getName());
+        $object->executeStep('b', fn (StepContextInterface $_) => null, 'c');
+        self::assertSame('c', $step->getName());
     }
 
     public function testStepSupport_CallbackSetsStepNameInContext_StepHasSameName(): void
@@ -77,7 +74,6 @@ class StepSupportTest extends TestCase
                 $this->createLifecycleWithUpdatableStep($step),
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -86,8 +82,8 @@ class StepSupportTest extends TestCase
             use StepSupport;
         };
 
-        $object->executeStep('c', fn (StepContextInterface $s) => $s->name('d'));
-        self::assertSame('d', $step->getName());
+        $object->executeStep('b', fn (StepContextInterface $s) => $s->name('c'));
+        self::assertSame('c', $step->getName());
     }
 
     /**
@@ -102,7 +98,6 @@ class StepSupportTest extends TestCase
                 $this->createLifecycleWithUpdatableStep($step),
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -112,7 +107,7 @@ class StepSupportTest extends TestCase
         };
 
         /** @var mixed $result */
-        $result = $object->executeStep('c', fn (StepContextInterface $_): mixed => $value);
+        $result = $object->executeStep('b', fn (StepContextInterface $_): mixed => $value);
         self::assertSame($value, $result);
     }
 

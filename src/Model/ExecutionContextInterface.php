@@ -6,7 +6,6 @@ namespace Qameta\Allure\Model;
 
 interface ExecutionContextInterface extends StorableResultInterface
 {
-
     public function getStage(): ?Stage;
 
     public function setStage(?Stage $stage): static;

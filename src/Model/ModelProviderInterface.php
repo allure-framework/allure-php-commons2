@@ -6,7 +6,6 @@ namespace Qameta\Allure\Model;
 
 interface ModelProviderInterface
 {
-
     /**
      * @return list<Link>
      */

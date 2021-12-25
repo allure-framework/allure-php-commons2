@@ -8,7 +8,6 @@ use JsonSerializable;
 
 final class ParameterMode extends AbstractEnum implements JsonSerializable
 {
-
     public const MASKED = 'masked';
     public const HIDDEN = 'hidden';
 

@@ -18,7 +18,6 @@ use const JSON_THROW_ON_ERROR;
  */
 class StageTest extends TestCase
 {
-
     public function testScheduled_CalledTwice_ReturnsSameInstance(): void
     {
         $severity = Stage::scheduled();

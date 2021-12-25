@@ -26,7 +26,6 @@ use function array_map;
  */
 class AnnotationReaderTest extends TestCase
 {
-
     protected mixed $demoNoAnnotations = null;
 
     #[NativePropertyAttribute("a")]

@@ -9,7 +9,6 @@ use JsonSerializable;
 
 final class SerializableDate implements JsonSerializable
 {
-
     public function __construct(private DateTimeImmutable $date)
     {
     }

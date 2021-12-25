@@ -13,7 +13,6 @@ use Qameta\Allure\Model\TestResult;
 
 interface AllureLifecycleInterface
 {
-
     public function switchThread(?string $thread): void;
 
     public function getCurrentTest(): ?string;

@@ -6,7 +6,6 @@ namespace Qameta\Allure\Model;
 
 trait ModelProviderTrait
 {
-
     /**
      * @return list<Link>
      */

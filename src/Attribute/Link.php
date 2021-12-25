@@ -10,7 +10,6 @@ use Qameta\Allure\Model;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class Link extends AbstractLink
 {
-
     public const CUSTOM = Model\LinkType::CUSTOM;
     public const ISSUE = Model\LinkType::ISSUE;
     public const TMS = Model\LinkType::TMS;

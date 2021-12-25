@@ -8,7 +8,6 @@ use function sprintf;
 
 final class LinkTemplate implements LinkTemplateInterface
 {
-
     public function __construct(
         private string $template,
     ) {

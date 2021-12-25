@@ -6,7 +6,6 @@ namespace Qameta\Allure\Attribute;
 
 interface LinkInterface extends AttributeInterface
 {
-
     public function getName(): ?string;
 
     public function getUrl(): ?string;

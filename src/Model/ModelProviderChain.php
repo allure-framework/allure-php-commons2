@@ -10,7 +10,6 @@ use function array_values;
 
 final class ModelProviderChain implements ModelProviderInterface
 {
-
     /**
      * @var list<ModelProviderInterface>
      */

@@ -11,7 +11,6 @@ use function is_object;
 
 final class InvalidMethodNameException extends \DomainException
 {
-
     public function __construct(
         private mixed $methodName,
         Throwable $previous = null,

@@ -13,7 +13,6 @@ use Throwable;
  */
 trait StepSupport
 {
-
     /**
      * Adds a simple step to current test case
      *

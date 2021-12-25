@@ -21,7 +21,6 @@ use function fread;
  */
 class AttachmentSupportTest extends TestCase
 {
-
     public function setUp(): void
     {
         Allure::reset();
@@ -37,7 +36,6 @@ class AttachmentSupportTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -49,7 +47,7 @@ class AttachmentSupportTest extends TestCase
             ->expects(self::once())
             ->method('addAttachment')
             ->with(self::identicalTo($attachment), self::isInstanceOf(DataSourceInterface::class));
-        $object->addAttachment('c', 'd');
+        $object->addAttachment('b', 'c');
     }
 
     public function testAddAttachment_GivenCaption_AttachmentHasSameName(): void
@@ -62,7 +60,6 @@ class AttachmentSupportTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -70,8 +67,8 @@ class AttachmentSupportTest extends TestCase
         $object = new class () {
             use AttachmentSupport;
         };
-        $object->addAttachment('c', 'd');
-        self::assertSame('d', $attachment->getName());
+        $object->addAttachment('b', 'c');
+        self::assertSame('c', $attachment->getName());
     }
 
     public function testAddAttachment_NoTypeGiven_AttachmentHasNullType(): void
@@ -84,7 +81,6 @@ class AttachmentSupportTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -92,7 +88,7 @@ class AttachmentSupportTest extends TestCase
         $object = new class () {
             use AttachmentSupport;
         };
-        $object->addAttachment('c', 'd');
+        $object->addAttachment('b', 'c');
         self::assertNull($attachment->getType());
     }
 
@@ -106,7 +102,6 @@ class AttachmentSupportTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -114,8 +109,8 @@ class AttachmentSupportTest extends TestCase
         $object = new class () {
             use AttachmentSupport;
         };
-        $object->addAttachment('c', 'd', 'e');
-        self::assertSame('e', $attachment->getType());
+        $object->addAttachment('b', 'c', 'd');
+        self::assertSame('d', $attachment->getType());
     }
 
     public function testAddAttachment_GivenFile_FileContentPassedToLifecycle(): void
@@ -128,7 +123,6 @@ class AttachmentSupportTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -155,7 +149,7 @@ class AttachmentSupportTest extends TestCase
                 ),
             );
 
-        $object->addAttachment(__FILE__, 'd');
+        $object->addAttachment(__FILE__, 'b');
     }
 
     public function testAddAttachment_GivenString_StringContentPassedToLifecycle(): void
@@ -168,7 +162,6 @@ class AttachmentSupportTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
 
         /**
          * @psalm-suppress DeprecatedTrait
@@ -190,12 +183,12 @@ class AttachmentSupportTest extends TestCase
                             fclose($resource);
                         }
 
-                        return 'cdef' === $data;
+                        return 'bcde' === $data;
                     }
                 ),
             );
 
-        $object->addAttachment('cdef', 'g');
+        $object->addAttachment('bcde', 'f');
     }
 
     private function createLifecycleBuilder(

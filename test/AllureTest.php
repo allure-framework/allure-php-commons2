@@ -10,7 +10,6 @@ use Qameta\Allure\Allure;
 use Qameta\Allure\AllureLifecycleInterface;
 use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Parameter;
-use Qameta\Allure\Exception\OutputDirectorySetFailureException;
 use Qameta\Allure\Internal\LifecycleBuilder;
 use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Io\StreamDataSource;
@@ -36,31 +35,9 @@ use const STDOUT;
  */
 class AllureTest extends TestCase
 {
-
     public function setUp(): void
     {
         Allure::reset();
-    }
-
-    public function testSetOutputDirectory_GivenPath_PassesSamePathToResultWriterOnLifecycleCreation(): void
-    {
-        $builder = $this->createMock(LifecycleBuilderInterface::class);
-        Allure::setLifecycleBuilder($builder);
-        Allure::setOutputDirectory('a');
-        $builder
-            ->expects(self::once())
-            ->method('createResultsWriter')
-            ->with(self::identicalTo('a'));
-        Allure::getLifecycle();
-    }
-
-    public function testSetOutputDirectory_CalledSecondTimeAfterLifecycleCreation_ThrowsException(): void
-    {
-        Allure::setLifecycleBuilder($this->createLifecycleBuilder());
-        Allure::setOutputDirectory('a');
-        Allure::getLifecycle();
-        $this->expectException(OutputDirectorySetFailureException::class);
-        Allure::setOutputDirectory('a');
     }
 
     public function testGetLifecycleConfigurator_BuilderSet_ReturnsSameBuilder(): void
@@ -91,7 +68,6 @@ class AllureTest extends TestCase
             ->willReturn($resultsWriter);
         $lifecycle = $this->createStub(AllureLifecycleInterface::class);
         Allure::setLifecycleBuilder($builder);
-        Allure::setOutputDirectory('a');
         $builder
             ->expects(self::once())
             ->method('createLifecycle')
@@ -110,7 +86,6 @@ class AllureTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
         $lifecycle
             ->expects(self::once())
             ->id('start')
@@ -121,7 +96,7 @@ class AllureTest extends TestCase
             ->after('start')
             ->method('stopStep')
             ->with(self::identicalTo('a'));
-        Allure::addStep('c');
+        Allure::addStep('b');
     }
 
     public function testAddStep_GivenName_StepHasSameName(): void
@@ -130,9 +105,8 @@ class AllureTest extends TestCase
         Allure::setLifecycleBuilder(
             $this->createLifecycleBuilder($this->createResultFactoryWithStep($step)),
         );
-        Allure::setOutputDirectory('b');
-        Allure::addStep('c');
-        self::assertSame('c', $step->getName());
+        Allure::addStep('b');
+        self::assertSame('b', $step->getName());
     }
 
     public function testAddStep_NoGivenStatus_StepHasPassedStatus(): void
@@ -141,8 +115,7 @@ class AllureTest extends TestCase
         Allure::setLifecycleBuilder(
             $this->createLifecycleBuilder($this->createResultFactoryWithStep($step)),
         );
-        Allure::setOutputDirectory('b');
-        Allure::addStep('c');
+        Allure::addStep('b');
         self::assertSame(Status::passed(), $step->getStatus());
     }
 
@@ -152,9 +125,8 @@ class AllureTest extends TestCase
         Allure::setLifecycleBuilder(
             $this->createLifecycleBuilder($this->createResultFactoryWithStep($step)),
         );
-        Allure::setOutputDirectory('b');
         $status = Status::failed();
-        Allure::addStep('c', $status);
+        Allure::addStep('b', $status);
         self::assertSame($status, $step->getStatus());
     }
 
@@ -171,7 +143,6 @@ class AllureTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
         $lifecycle
             ->expects(self::once())
             ->id('start')
@@ -198,7 +169,6 @@ class AllureTest extends TestCase
                 $lifecycle,
             ),
         );
-        Allure::setOutputDirectory('b');
         $lifecycle
             ->expects(self::once())
             ->id('start')
@@ -224,7 +194,6 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         Allure::runStep(fn () => null);
         self::assertSame('step', $step->getName());
     }
@@ -239,10 +208,9 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::setDefaultStepName('c');
+        Allure::setDefaultStepName('b');
         Allure::runStep(fn () => null);
-        self::assertSame('c', $step->getName());
+        self::assertSame('b', $step->getName());
     }
 
     public function testRunStep_OnlyClosureDisplayNameAttributeProvided_StepHasProvidedName(): void
@@ -255,9 +223,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::runStep(#[DisplayName('c')] fn () => null);
-        self::assertSame('c', $step->getName());
+        Allure::runStep(#[DisplayName('b')] fn () => null);
+        self::assertSame('b', $step->getName());
     }
 
     public function testRunStep_OnlyMethodDisplayNameAttributeProvided_StepHasMatchingName(): void
@@ -270,12 +237,11 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         Allure::runStep([$this, 'titledStep']);
-        self::assertSame('c', $step->getName());
+        self::assertSame('b', $step->getName());
     }
 
-    #[DisplayName('c')]
+    #[DisplayName('b')]
     public function titledStep(): void
     {
     }
@@ -290,9 +256,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::runStep(#[DisplayName('c')] fn () => null, 'd');
-        self::assertSame('d', $step->getName());
+        Allure::runStep(#[DisplayName('b')] fn () => null, 'c');
+        self::assertSame('c', $step->getName());
     }
 
     public function testRunStep_ClosureParameterAttributeProvided_StepHasMatchingParameter(): void
@@ -305,11 +270,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::runStep(#[Parameter('c', 'd')] fn () => null);
+        Allure::runStep(#[Parameter('b', 'c')] fn () => null);
         $parameter = $step->getParameters()[0] ?? null;
-        self::assertSame('c', $parameter?->getName());
-        self::assertSame('d', $parameter?->getValue());
+        self::assertSame('b', $parameter?->getName());
+        self::assertSame('c', $parameter?->getValue());
     }
 
     public function testRunStep_MethodParameterAttributeProvided_StepHasMatchingParameter(): void
@@ -322,14 +286,13 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         Allure::runStep([$this, 'parametrizedStep']);
         $parameter = $step->getParameters()[0] ?? null;
-        self::assertSame('c', $parameter?->getName());
-        self::assertSame('d', $parameter?->getValue());
+        self::assertSame('b', $parameter?->getName());
+        self::assertSame('c', $parameter?->getValue());
     }
 
-    #[Parameter('c', 'd')]
+    #[Parameter('b', 'c')]
     public function parametrizedStep(): void
     {
     }
@@ -344,8 +307,7 @@ class AllureTest extends TestCase
             $this->createLifecycleBuilder($this->createResultFactoryWithStep($step)),
         );
 
-        Allure::setOutputDirectory('b');
-        self::assertSame($value, Allure::runStep(fn (): mixed => $value, 'd'));
+        self::assertSame($value, Allure::runStep(fn (): mixed => $value, 'c'));
     }
 
     public function testRunStep_NoExceptionThrownDuringStep_StepStatusIsPassed(): void
@@ -358,7 +320,6 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         Allure::runStep(fn () => null);
         self::assertSame(Status::passed(), $step->getStatus());
         self::assertNull($step->getStatusDetails());
@@ -388,7 +349,6 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         try {
             Allure::runStep(fn() => throw $error);
         } catch (Throwable) {
@@ -425,9 +385,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::runStep(fn (StepContextInterface $s) => $s->name('c'));
-        self::assertSame('c', $step->getName());
+        Allure::runStep(fn (StepContextInterface $s) => $s->name('b'));
+        self::assertSame('b', $step->getName());
     }
 
     /**
@@ -443,8 +402,7 @@ class AllureTest extends TestCase
             $this->createLifecycleBuilder($this->createResultFactoryWithAttachment($attachment)),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::attachment($name, 'c', $type, $fileExtension);
+        Allure::attachment($name, 'b', $type, $fileExtension);
         self::assertSame($name, $attachment->getName());
         self::assertSame($type, $attachment->getType());
         self::assertSame($fileExtension, $attachment->getFileExtension());
@@ -456,10 +414,10 @@ class AllureTest extends TestCase
     public function providerAttachmentProperties(): iterable
     {
         return [
-            'Only name' => ['d', null, null],
-            'Name and type' => ['d', 'e', null],
-            'Name and file extension' => ['d', null, 'e'],
-            'Name, type and file extension' => ['d', 'e', 'f'],
+            'Only name' => ['c', null, null],
+            'Name and type' => ['c', 'd', null],
+            'Name and file extension' => ['c', null, 'd'],
+            'Name, type and file extension' => ['c', 'd', 'e'],
         ];
     }
 
@@ -474,7 +432,6 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         $lifecycle
             ->expects(self::once())
             ->method('addAttachment')
@@ -482,7 +439,7 @@ class AllureTest extends TestCase
                 self::identicalTo($attachment),
                 self::isInstanceOf(StringDataSource::class),
             );
-        Allure::attachment('c', 'd');
+        Allure::attachment('b', 'c');
     }
 
     /**
@@ -498,8 +455,7 @@ class AllureTest extends TestCase
             $this->createLifecycleBuilder($this->createResultFactoryWithAttachment($attachment)),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::attachmentFile($name, 'c', $type, $fileExtension);
+        Allure::attachmentFile($name, 'b', $type, $fileExtension);
         self::assertSame($name, $attachment->getName());
         self::assertSame($type, $attachment->getType());
         self::assertSame($fileExtension, $attachment->getFileExtension());
@@ -516,7 +472,6 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         $lifecycle
             ->expects(self::once())
             ->method('addAttachment')
@@ -524,7 +479,7 @@ class AllureTest extends TestCase
                 self::identicalTo($attachment),
                 self::isInstanceOf(StreamDataSource::class),
             );
-        Allure::attachmentFile('c', 'd');
+        Allure::attachmentFile('b', 'c');
     }
 
     public function testEpic_GivenValue_TestHasMatchingLabel(): void
@@ -537,11 +492,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::epic('c');
+        Allure::epic('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('epic', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testFeature_GivenValue_TestHasMatchingLabel(): void
@@ -554,11 +508,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::feature('c');
+        Allure::feature('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('feature', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testStory_GivenValue_TestHasMatchingLabel(): void
@@ -571,11 +524,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::story('c');
+        Allure::story('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('story', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testSuite_GivenValue_TestHasMatchingLabel(): void
@@ -588,11 +540,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::suite('c');
+        Allure::suite('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('suite', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testParentSuite_GivenValue_TestHasMatchingLabel(): void
@@ -605,11 +556,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::parentSuite('c');
+        Allure::parentSuite('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('parentSuite', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testSubSuite_GivenValue_TestHasMatchingLabel(): void
@@ -622,11 +572,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::subSuite('c');
+        Allure::subSuite('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('subSuite', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testSeverity_GivenValue_TestHasMatchingLabel(): void
@@ -639,7 +588,6 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         Allure::severity(Severity::critical());
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('severity', $label?->getName());
@@ -656,11 +604,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::tag('c');
+        Allure::tag('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('tag', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testOwner_GivenValue_TestHasMatchingLabel(): void
@@ -673,7 +620,6 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         Allure::owner('c');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('owner', $label?->getName());
@@ -690,11 +636,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::lead('c');
+        Allure::lead('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('lead', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testPackage_GivenValue_TestHasMatchingLabel(): void
@@ -707,11 +652,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::package('c');
+        Allure::package('b');
         $label = $test->getLabels()[0] ?? null;
         self::assertSame('package', $label?->getName());
-        self::assertSame('c', $label?->getValue());
+        self::assertSame('b', $label?->getValue());
     }
 
     public function testLabel_GivenNameAndValue_TestHasMatchingLabel(): void
@@ -724,11 +668,10 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::label('c', 'd');
+        Allure::label('b', 'c');
         $label = $test->getLabels()[0] ?? null;
-        self::assertSame('c', $label?->getName());
-        self::assertSame('d', $label?->getValue());
+        self::assertSame('b', $label?->getName());
+        self::assertSame('c', $label?->getValue());
     }
 
     public function testParameter_GivenName_TestHasParameterWithSameName(): void
@@ -741,10 +684,9 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::parameter('c', null);
+        Allure::parameter('b', null);
         $parameter = $test->getParameters()[0] ?? null;
-        self::assertSame('c', $parameter?->getName());
+        self::assertSame('b', $parameter?->getName());
     }
 
     /**
@@ -760,8 +702,7 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::parameter('c', $value);
+        Allure::parameter('b', $value);
         $parameter = $test->getParameters()[0] ?? null;
         self::assertNotNull($parameter);
         self::assertSame($value, $parameter->getValue());
@@ -774,7 +715,7 @@ class AllureTest extends TestCase
     {
         return [
             'Null value' => [null],
-            'Non-null value' => ['d'],
+            'Non-null value' => ['c'],
         ];
     }
 
@@ -788,8 +729,7 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::parameter('c', null);
+        Allure::parameter('b', null);
         $parameter = $test->getParameters()[0] ?? null;
         self::assertFalse($parameter?->getExcluded());
     }
@@ -807,8 +747,7 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::parameter('c', null, $excluded);
+        Allure::parameter('b', null, $excluded);
         $parameter = $test->getParameters()[0] ?? null;
         self::assertNotNull($parameter);
         self::assertSame($excluded, $parameter->getExcluded());
@@ -838,8 +777,7 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::parameter('c', null, mode: $mode);
+        Allure::parameter('b', null, mode: $mode);
         $parameter = $test->getParameters()[0] ?? null;
         self::assertNotNull($parameter);
         self::assertSame($mode, $parameter->getMode());
@@ -866,13 +804,12 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::issue('c', 'd');
+        Allure::issue('b', 'c');
         $link = $test->getLinks()[0] ?? null;
         self::assertNotNull($link);
         self::assertSame(LinkType::issue(), $link->getType());
-        self::assertSame('c', $link->getName());
-        self::assertSame('d', $link->getUrl());
+        self::assertSame('b', $link->getName());
+        self::assertSame('c', $link->getUrl());
     }
 
     public function testIssue_GivenNameWithoutValue_TestHasMatchingLink(): void
@@ -885,12 +822,11 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::issue('c');
+        Allure::issue('b');
         $link = $test->getLinks()[0] ?? null;
         self::assertNotNull($link);
         self::assertSame(LinkType::issue(), $link->getType());
-        self::assertSame('c', $link->getName());
+        self::assertSame('b', $link->getName());
         self::assertNull($link->getUrl());
     }
 
@@ -904,13 +840,12 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::tms('c', 'd');
+        Allure::tms('b', 'c');
         $link = $test->getLinks()[0] ?? null;
         self::assertNotNull($link);
         self::assertSame(LinkType::tms(), $link->getType());
-        self::assertSame('c', $link->getName());
-        self::assertSame('d', $link->getUrl());
+        self::assertSame('b', $link->getName());
+        self::assertSame('c', $link->getUrl());
     }
 
     public function testTms_GivenNameWithoutValue_TestHasMatchingLink(): void
@@ -923,12 +858,11 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::tms('c');
+        Allure::tms('b');
         $link = $test->getLinks()[0] ?? null;
         self::assertNotNull($link);
         self::assertSame(LinkType::tms(), $link->getType());
-        self::assertSame('c', $link->getName());
+        self::assertSame('b', $link->getName());
         self::assertNull($link->getUrl());
     }
 
@@ -942,10 +876,9 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::link('c');
+        Allure::link('b');
         $link = $test->getLinks()[0] ?? null;
-        self::assertSame('c', $link?->getUrl());
+        self::assertSame('b', $link?->getUrl());
     }
 
     /**
@@ -961,8 +894,7 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::link('c', $name);
+        Allure::link('b', $name);
         $link = $test->getLinks()[0] ?? null;
         self::assertNotNull($link);
         self::assertSame($name, $link->getName());
@@ -978,8 +910,7 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::link('c');
+        Allure::link('b');
         $link = $test->getLinks()[0] ?? null;
         self::assertSame(LinkType::custom(), $link?->getType());
     }
@@ -994,9 +925,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
         $type = LinkType::tms();
-        Allure::link('c', type: $type);
+        Allure::link('b', type: $type);
         $link = $test->getLinks()[0] ?? null;
         self::assertSame($type, $link?->getType());
     }
@@ -1008,7 +938,7 @@ class AllureTest extends TestCase
     {
         return [
             'Null name' => [null],
-            'Non-null name' => ['d'],
+            'Non-null name' => ['c'],
         ];
     }
 
@@ -1022,9 +952,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::displayName('c');
-        self::assertSame('c', $test->getName());
+        Allure::displayName('b');
+        self::assertSame('b', $test->getName());
     }
 
     public function testTitle_LifecycleUpdatesStep_StepHasSameName(): void
@@ -1037,9 +966,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::displayName('c');
-        self::assertSame('c', $step->getName());
+        Allure::displayName('b');
+        self::assertSame('b', $step->getName());
     }
 
     public function testDescription_LifecycleUpdatesTest_TestHasSameDescription(): void
@@ -1052,9 +980,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::description('c');
-        self::assertSame('c', $test->getDescription());
+        Allure::description('b');
+        self::assertSame('b', $test->getDescription());
     }
 
     public function testDescription_LifecycleUpdatesStep_StepHasSameDescription(): void
@@ -1067,9 +994,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::description('c');
-        self::assertSame('c', $step->getDescription());
+        Allure::description('b');
+        self::assertSame('b', $step->getDescription());
     }
 
     public function testDescriptionHtml_LifecycleUpdatesTest_TestHasSameDescription(): void
@@ -1082,9 +1008,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::descriptionHtml('c');
-        self::assertSame('c', $test->getDescriptionHtml());
+        Allure::descriptionHtml('b');
+        self::assertSame('b', $test->getDescriptionHtml());
     }
 
     public function testDescriptionHtml_LifecycleUpdatesStep_StepHasSameDescription(): void
@@ -1097,9 +1022,8 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::setOutputDirectory('b');
-        Allure::descriptionHtml('c');
-        self::assertSame('c', $step->getDescriptionHtml());
+        Allure::descriptionHtml('b');
+        self::assertSame('b', $step->getDescriptionHtml());
     }
 
     private function createLifecycleBuilder(

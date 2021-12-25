@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Qameta\Allure\AllureLifecycle;
 use Qameta\Allure\AllureLifecycleInterface;
+use Qameta\Allure\Exception\OutputDirectoryUndefinedException;
 use Qameta\Allure\Hook\LifecycleHookInterface;
 use Qameta\Allure\Io\ClockInterface;
 use Qameta\Allure\Io\FileSystemResultsWriter;
@@ -30,6 +31,7 @@ use function array_values;
 
 final class LifecycleBuilder implements LifecycleBuilderInterface
 {
+    private ?string $outputDirectory = null;
 
     private ?UuidFactoryInterface $uuidFactory = null;
 
@@ -65,12 +67,24 @@ final class LifecycleBuilder implements LifecycleBuilderInterface
         );
     }
 
-    public function createResultsWriter(string $outputDirectory): ResultsWriterInterface
+    public function setOutputDirectory(string $outputDirectory): LifecycleConfiguratorInterface
+    {
+        $this->outputDirectory = $outputDirectory;
+
+        return $this;
+    }
+
+    public function createResultsWriter(): ResultsWriterInterface
     {
         return new FileSystemResultsWriter(
-            $outputDirectory,
+            $this->getOutputDirectory(),
             $this->getLogger(),
         );
+    }
+
+    private function getOutputDirectory(): string
+    {
+        return $this->outputDirectory ?? throw new OutputDirectoryUndefinedException();
     }
 
     public function setResultFactory(ResultFactoryInterface $resultFactory): self
@@ -87,11 +101,9 @@ final class LifecycleBuilder implements LifecycleBuilderInterface
         );
     }
 
-    public function addHooks(
-        LifecycleHookInterface $hook,
-        LifecycleHookInterface ...$moreHooks,
-    ): self {
-        $this->lifecycleHooks = [...$this->lifecycleHooks, $hook, ...array_values($moreHooks)];
+    public function addHooks(LifecycleHookInterface ...$hooks): self
+    {
+        $this->lifecycleHooks = [...$this->lifecycleHooks, ...array_values($hooks)];
 
         return $this;
     }

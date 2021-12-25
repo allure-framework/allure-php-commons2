@@ -9,7 +9,6 @@ use Throwable;
 
 final class ActiveContainerNotFoundException extends LogicException
 {
-
     public function __construct(Throwable $previous = null)
     {
         parent::__construct("Active container not found", 0, $previous);

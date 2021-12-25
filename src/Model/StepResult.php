@@ -4,7 +4,6 @@ namespace Qameta\Allure\Model;
 
 final class StepResult extends ExecutionContext
 {
-
     public function getResultType(): ResultType
     {
         return ResultType::step();

@@ -8,7 +8,6 @@ use Stringable;
 
 abstract class AbstractEnum implements Stringable
 {
-
     /**
      * @var array<string, static>
      */

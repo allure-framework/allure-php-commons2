@@ -8,7 +8,6 @@ use function array_values;
 
 final class TestResult extends ExecutionContext
 {
-
     protected ?string $historyId = null;
 
     protected ?string $testCaseId = null;

@@ -6,6 +6,7 @@ namespace Qameta\Allure\Test\Model;
 
 use JsonException;
 use PHPUnit\Framework\TestCase;
+use Qameta\Allure\Model\Exception\InvalidSeverityException;
 use Qameta\Allure\Model\Severity;
 
 use function json_encode;
@@ -18,6 +19,40 @@ use const JSON_THROW_ON_ERROR;
  */
 class SeverityTest extends TestCase
 {
+    public function testFromString_InvalidValue_ThrowsException(): void
+    {
+        $this->expectException(InvalidSeverityException::class);
+        Severity::fromString('a');
+    }
+
+    /**
+     * @dataProvider providerValues
+     */
+    public function testFromString_CalledTwice_ReturnsSameInstance(string $value): void
+    {
+        $severity = Severity::fromString($value);
+        self::assertSame($severity, Severity::fromString($value));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public function providerValues(): iterable
+    {
+        return [
+            'Blocker' => ['blocker'],
+            'Critical' => ['critical'],
+        ];
+    }
+
+    /**
+     * @dataProvider providerValues
+     */
+    public function testFromString_GivenValue_ResultCastsToSameValue(string $value): void
+    {
+        $severity = Severity::fromString($value);
+        self::assertSame($value, (string) $severity);
+    }
 
     public function testBlocker_CalledTwice_ReturnsSameInstance(): void
     {

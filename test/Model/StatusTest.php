@@ -18,7 +18,6 @@ use const JSON_THROW_ON_ERROR;
  */
 class StatusTest extends TestCase
 {
-
     public function testFailed_CalledTwice_ReturnsSameInstance(): void
     {
         $status = Status::failed();
