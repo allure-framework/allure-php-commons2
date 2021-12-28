@@ -56,14 +56,6 @@ final class Allure
         self::$instance = null;
     }
 
-    /**
-     * @deprecated Please use lifecycle configurator to set output directory.
-     */
-    public static function setOutputDirectory(string $outputDirectory): void
-    {
-        self::getLifecycleConfigurator()->setOutputDirectory($outputDirectory);
-    }
-
     public static function getLifecycleConfigurator(): LifecycleConfiguratorInterface
     {
         return self::getInstance()->getLifecycleBuilder();
