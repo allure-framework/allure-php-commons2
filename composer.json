@@ -29,7 +29,7 @@
   "require": {
     "php": "^8",
     "ext-json": "*",
-    "doctrine/annotations": "^1.12",
+    "doctrine/annotations": "^2.0",
     "psr/log": "^1 || ^2 || ^3",
     "ramsey/uuid": "^3 || ^4"
   },
