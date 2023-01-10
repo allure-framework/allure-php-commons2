@@ -30,7 +30,7 @@ class StatusDetailsTest extends TestCase
     /**
      * @return iterable<string, array{bool|null}>
      */
-    public function providerIsKnownValue(): iterable
+    public static function providerIsKnownValue(): iterable
     {
         return [
             'Null' => [null],
@@ -73,7 +73,7 @@ class StatusDetailsTest extends TestCase
     /**
      * @return iterable<string, array{bool|null}>
      */
-    public function providerIsMutedValue(): iterable
+    public static function providerIsMutedValue(): iterable
     {
         return [
             'Null' => [null],
@@ -116,7 +116,7 @@ class StatusDetailsTest extends TestCase
     /**
      * @return iterable<string, array{bool|null}>
      */
-    public function providerIsFlakyValue(): iterable
+    public static function providerIsFlakyValue(): iterable
     {
         return [
             'Null' => [null],
@@ -159,7 +159,7 @@ class StatusDetailsTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerGetMessageValue(): iterable
+    public static function providerGetMessageValue(): iterable
     {
         return [
             'Null' => [null],
@@ -201,7 +201,7 @@ class StatusDetailsTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerGetTraceValue(): iterable
+    public static function providerGetTraceValue(): iterable
     {
         return [
             'Null' => [null],

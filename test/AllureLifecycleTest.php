@@ -80,7 +80,7 @@ class AllureLifecycleTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerGetCurrentTest(): iterable
+    public static function providerGetCurrentTest(): iterable
     {
         return [
             'No current test' => [null],
@@ -111,7 +111,7 @@ class AllureLifecycleTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerGetCurrentStep(): iterable
+    public static function providerGetCurrentStep(): iterable
     {
         return [
             'No current step' => [null],
@@ -142,7 +142,7 @@ class AllureLifecycleTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerGetCurrentTestOrStep(): iterable
+    public static function providerGetCurrentTestOrStep(): iterable
     {
         return [
             'No current test or step' => [null],
@@ -153,7 +153,7 @@ class AllureLifecycleTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerSwitchThread(): iterable
+    public static function providerSwitchThread(): iterable
     {
         return [
             'Default thread' => [null],

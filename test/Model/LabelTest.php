@@ -305,7 +305,7 @@ class LabelTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerName(): iterable
+    public static function providerName(): iterable
     {
         return [
             'Null' => [null],
@@ -347,7 +347,7 @@ class LabelTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerValue(): iterable
+    public static function providerValue(): iterable
     {
         return [
             'Null' => [null],
@@ -387,7 +387,7 @@ class LabelTest extends TestCase
     /**
      * @return iterable<string, array{string|null, string|null, string}>
      */
-    public function providerJsonSerialize(): iterable
+    public static function providerJsonSerialize(): iterable
     {
         return [
             'Null name and value' => [null, null, '{"name":null,"value":null}'],

@@ -37,7 +37,7 @@ class SeverityTest extends TestCase
     /**
      * @return iterable<string, array{string}>
      */
-    public function providerValues(): iterable
+    public static function providerValues(): iterable
     {
         return [
             'Blocker' => ['blocker'],
