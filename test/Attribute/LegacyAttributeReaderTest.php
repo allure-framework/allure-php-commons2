@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Qameta\Allure\Test\Attribute;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineReader;
+use Doctrine\Common\Annotations\Reader;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Attribute\AttributeReader;
+use Qameta\Allure\Attribute\AttributeReaderInterface;
 use Qameta\Allure\Attribute\Description;
 use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Feature;
@@ -24,7 +26,7 @@ use function array_map;
 /**
  * @covers \Qameta\Allure\Attribute\LegacyAttributeReader
  */
-class AnnotationReaderTest extends TestCase
+class LegacyAttributeReaderTest extends TestCase
 {
     protected mixed $demoNoAnnotations = null;
 
@@ -315,5 +317,15 @@ class AnnotationReaderTest extends TestCase
     #[Feature("f")]
     protected function demoMixedAnnotations(): void
     {
+    }
+
+    public function testGetEnvironmentAnnotations_Always_ReturnsEmptyList(): void
+    {
+        $legacyReader = new LegacyAttributeReader(
+            $this->createStub(Reader::class),
+            $this->createStub(AttributeReaderInterface::class),
+        );
+
+        self::assertEmpty($legacyReader->getEnvironmentAnnotations([]));
     }
 }
