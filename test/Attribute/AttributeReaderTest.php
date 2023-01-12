@@ -83,10 +83,10 @@ class AttributeReaderTest extends TestCase
                 ['ab' => 1],
                 [['class' => Label::class, 'name' => 'b', 'value' => '1']],
             ],
-            'Variable with uppercase value' => [
+            'Variable with uppercase name' => [
                 'a',
                 ['aB' => 1],
-                [['class' => Label::class, 'name' => 'b', 'value' => '1']],
+                [['class' => Label::class, 'name' => 'B', 'value' => '1']],
             ],
             'First variable with matching prefix' => [
                 'a',

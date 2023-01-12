@@ -17,7 +17,6 @@ use function class_exists;
 use function is_a;
 use function str_starts_with;
 use function strlen;
-use function strtolower;
 use function substr;
 
 final class AttributeReader implements AttributeReaderInterface
@@ -103,7 +102,7 @@ final class AttributeReader implements AttributeReaderInterface
                 if ('' == $labelName) {
                     continue;
                 }
-                $labels[] = new Label(strtolower($labelName), isset($value) ? (string) $value : null);
+                $labels[] = new Label($labelName, isset($value) ? (string) $value : null);
             }
         }
 
