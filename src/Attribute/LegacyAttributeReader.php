@@ -109,4 +109,13 @@ final class LegacyAttributeReader implements AttributeReaderInterface
 
         return array_values($filteredResult);
     }
+
+    /**
+     * @param array $variables
+     * @return list<AttributeInterface>
+     */
+    public function getEnvironmentAnnotations(array $variables): array
+    {
+        return [];
+    }
 }

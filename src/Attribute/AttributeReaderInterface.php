@@ -38,4 +38,10 @@ interface AttributeReaderInterface
      * @return list<AttributeInterface>
      */
     public function getFunctionAnnotations(ReflectionFunction $function, ?string $name = null): array;
+
+    /**
+     * @param array $variables
+     * @return list<AttributeInterface>
+     */
+    public function getEnvironmentAnnotations(array $variables): array;
 }

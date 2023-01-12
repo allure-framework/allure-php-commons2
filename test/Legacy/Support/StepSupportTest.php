@@ -114,7 +114,7 @@ class StepSupportTest extends TestCase
     /**
      * @return iterable<string, array{mixed}>
      */
-    public function providerReturnValue(): iterable
+    public static function providerReturnValue(): iterable
     {
         return [
             'Null' => [null],

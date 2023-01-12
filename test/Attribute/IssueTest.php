@@ -33,7 +33,7 @@ class IssueTest extends TestCase
     /**
      * @return iterable<string, array{string, string|null}>
      */
-    public function providerGetName(): iterable
+    public static function providerGetName(): iterable
     {
         return [
             'No arguments' => ['demoNoArguments', null],
@@ -55,7 +55,7 @@ class IssueTest extends TestCase
     /**
      * @return iterable<string, array{string, string|null}>
      */
-    public function providerGetUrl(): iterable
+    public static function providerGetUrl(): iterable
     {
         return [
             'No arguments' => ['demoNoArguments', null],

@@ -77,7 +77,7 @@ class LinkTypeTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerFromOptionalStringInvalidValue(): iterable
+    public static function providerFromOptionalStringInvalidValue(): iterable
     {
         return [
             'Null' => [null],

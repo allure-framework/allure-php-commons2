@@ -360,7 +360,7 @@ class AllureTest extends TestCase
     /**
      * @return iterable<string, array{mixed}>
      */
-    public function providerRunStepResult(): iterable
+    public static function providerRunStepResult(): iterable
     {
         return [
             'Null' => [null],
@@ -411,7 +411,7 @@ class AllureTest extends TestCase
     /**
      * @return iterable<string, array{string, string|null, string|null}>
      */
-    public function providerAttachmentProperties(): iterable
+    public static function providerAttachmentProperties(): iterable
     {
         return [
             'Only name' => ['c', null, null],
@@ -711,7 +711,7 @@ class AllureTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerParameterValue(): iterable
+    public static function providerParameterValue(): iterable
     {
         return [
             'Null value' => [null],
@@ -756,7 +756,7 @@ class AllureTest extends TestCase
     /**
      * @return iterable<string, array{bool}>
      */
-    public function providerParameterExcluded(): iterable
+    public static function providerParameterExcluded(): iterable
     {
         return [
             'Excluded' => [true],
@@ -786,7 +786,7 @@ class AllureTest extends TestCase
     /**
      * @return iterable<string, array{ParameterMode|null}>
      */
-    public function providerParameterMode(): iterable
+    public static function providerParameterMode(): iterable
     {
         return [
             'Null mode' => [null],
@@ -934,7 +934,7 @@ class AllureTest extends TestCase
     /**
      * @return iterable<string, array{string|null}>
      */
-    public function providerLinkName(): iterable
+    public static function providerLinkName(): iterable
     {
         return [
             'Null name' => [null],

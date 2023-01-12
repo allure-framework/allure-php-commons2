@@ -15,9 +15,19 @@ use function array_map;
 use function array_values;
 use function class_exists;
 use function is_a;
+use function str_starts_with;
+use function strlen;
+use function substr;
 
 final class AttributeReader implements AttributeReaderInterface
 {
+    private const ENV_LABEL_PREFIX = 'ALLURE_LABEL_';
+
+    public function __construct(
+        private string $envLabelPrefix = self::ENV_LABEL_PREFIX,
+    ) {
+    }
+
     /**
      * @param ReflectionClass $class
      * @param class-string|null     $name
@@ -64,7 +74,7 @@ final class AttributeReader implements AttributeReaderInterface
      */
     private function getAttributeInstances(ReflectionAttribute ...$attributes): array
     {
-        /** @var array<ReflectionAttribute<AttributeInterface>> $filteredAttributes */
+        /** @psalm-var array<ReflectionAttribute<AttributeInterface>> $filteredAttributes */
         $filteredAttributes = array_filter(
             $attributes,
             fn (ReflectionAttribute $attribute): bool =>
@@ -76,5 +86,26 @@ final class AttributeReader implements AttributeReaderInterface
             fn (ReflectionAttribute $attribute): AttributeInterface => $attribute->newInstance(),
             array_values($filteredAttributes),
         );
+    }
+
+    /**
+     * @param array $variables
+     * @return list<AttributeInterface>
+     */
+    public function getEnvironmentAnnotations(array $variables): array
+    {
+        $labels = [];
+        /** @psalm-var mixed $value */
+        foreach ($variables as $variableName => $value) {
+            if (str_starts_with((string) $variableName, $this->envLabelPrefix)) {
+                $labelName = substr((string) $variableName, strlen($this->envLabelPrefix));
+                if ('' == $labelName) {
+                    continue;
+                }
+                $labels[] = new Label($labelName, isset($value) ? (string) $value : null);
+            }
+        }
+
+        return $labels;
     }
 }

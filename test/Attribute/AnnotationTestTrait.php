@@ -52,13 +52,9 @@ trait AnnotationTestTrait
         }
         $attribute = $method->getAttributes($attributeClass)[0] ?? null;
 
-        $instance = isset($attribute)
+        return isset($attribute)
             ? $attribute->newInstance()
             : throw new RuntimeException("Attribute {$attributeClass} not found in {$demoMethodName}");
-
-        return $instance instanceof $attributeClass
-            ? $instance
-            : throw new RuntimeException("Attribute is not {$attributeClass} instance");
     }
 
     protected function exportLabel(LabelInterface $label): array
