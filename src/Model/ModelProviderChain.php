@@ -6,6 +6,7 @@ namespace Qameta\Allure\Model;
 
 use function array_map;
 use function array_merge;
+use function array_reverse;
 use function array_values;
 
 final class ModelProviderChain implements ModelProviderInterface
@@ -40,10 +41,12 @@ final class ModelProviderChain implements ModelProviderInterface
     public function getLabels(): array
     {
         return array_merge(
-            ...array_map(
-                /** @psalm-return list<Label> */
-                fn (ModelProviderInterface $p): array => $p->getLabels(),
-                $this->providers,
+            ...array_reverse(
+                array_map(
+                    /** @psalm-return list<Label> */
+                    fn (ModelProviderInterface $p): array => $p->getLabels(),
+                    $this->providers,
+                ),
             ),
         );
     }

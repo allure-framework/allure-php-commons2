@@ -868,24 +868,47 @@ class AllureLifecycleTest extends TestCase
         );
 
         $container->setExcluded(true);
+        $removeAttachmentResults = [];
         $resultsWriter
             ->expects(self::exactly(6))
             ->method('removeAttachment')
-            ->withConsecutive(
-                [self::identicalTo($setUpAttachment)],
-                [self::identicalTo($setUpStepAttachment)],
-                [self::identicalTo($testAttachment)],
-                [self::identicalTo($testStepAttachment)],
-                [self::identicalTo($tearDownAttachment)],
-                [self::identicalTo($tearDownStepAttachment)],
+            ->with(
+                self::callback(
+                    function (AttachmentResult $attachmentResult) use (&$removeAttachmentResults): bool {
+                        /** @psalm-var list<AttachmentResult> $removeAttachmentResults */
+                        $removeAttachmentResults[] = $attachmentResult;
+
+                        return true;
+                    },
+                ),
             );
+        $removeTestResults = [];
         $resultsWriter
             ->expects(self::exactly(1))
             ->method('removeTest')
-            ->withConsecutive(
-                [self::identicalTo($test)],
+            ->with(
+                self::callback(
+                    function (TestResult $testResult) use (&$removeTestResults): bool {
+                        /** @psalm-var list<TestResult> $removeTestResults */
+                        $removeTestResults[] = $testResult;
+
+                        return true;
+                    },
+                ),
             );
         $lifecycle->writeContainer('a');
+        self::assertSame(
+            [
+                $setUpAttachment,
+                $setUpStepAttachment,
+                $testAttachment,
+                $testStepAttachment,
+                $tearDownAttachment,
+                $tearDownStepAttachment,
+            ],
+            $removeAttachmentResults,
+        );
+        self::assertSame([$test], $removeTestResults);
     }
 
     public function testWriteContainer_WriterFailsToRemoveExcludedTest_LogsError(): void
@@ -2722,14 +2745,25 @@ class AllureLifecycleTest extends TestCase
         );
 
         $test->setExcluded(true);
+        $removeAttachmentResults = [];
         $resultsWriter
             ->expects(self::exactly(2))
             ->method('removeAttachment')
-            ->withConsecutive(
-                [self::identicalTo($testAttachment)],
-                [self::identicalTo($testStepAttachment)],
+            ->with(
+                self::callback(
+                    function (AttachmentResult $attachmentResult) use (&$removeAttachmentResults): bool {
+                        /** @psalm-var list<AttachmentResult> $removeAttachmentResults */
+                        $removeAttachmentResults[] = $attachmentResult;
+
+                        return true;
+                    },
+                ),
             );
         $lifecycle->writeTest('a');
+        self::assertSame(
+            [$testAttachment, $testStepAttachment],
+            $removeAttachmentResults,
+        );
     }
 
     public function testWriteTest_WriterFailsToRemoveAttachment_LogsError(): void

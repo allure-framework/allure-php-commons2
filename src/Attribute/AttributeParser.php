@@ -18,6 +18,7 @@ use ReflectionMethod;
 use ReflectionProperty;
 
 use function array_merge;
+use function array_reverse;
 use function is_string;
 
 final class AttributeParser implements ModelProviderInterface
@@ -161,7 +162,7 @@ final class AttributeParser implements ModelProviderInterface
      */
     public function getLabels(): array
     {
-        return $this->labels;
+        return array_reverse($this->labels);
     }
 
     private function createParameter(ParameterInterface $parameter): Model\Parameter
