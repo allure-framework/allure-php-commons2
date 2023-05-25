@@ -96,7 +96,7 @@ class ModelProviderChainTest extends TestCase
         self::assertSame([$labelA, $labelB], $chain->getLabels());
     }
 
-    public function testGetLabels_BothProvidersReturnLabels_ReturnsMergedLabels(): void
+    public function testGetLabels_BothProvidersReturnLabels_ReturnsMergedLabelsInReverseOrder(): void
     {
         $firstProvider = $this->createStub(ModelProviderInterface::class);
         $secondProvider = $this->createStub(ModelProviderInterface::class);
@@ -109,7 +109,7 @@ class ModelProviderChainTest extends TestCase
             ->method('getLabels')
             ->willReturn([$labelB]);
         $chain = new ModelProviderChain($firstProvider, $secondProvider);
-        self::assertSame([$labelA, $labelB], $chain->getLabels());
+        self::assertSame([$labelB, $labelA], $chain->getLabels());
     }
 
     public function testGetParameters_ConstructedWithoutProviders_ReturnsEmptyList(): void

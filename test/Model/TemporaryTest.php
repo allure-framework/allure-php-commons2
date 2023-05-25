@@ -21,6 +21,9 @@ use Qameta\Allure\StepContextInterface;
 use RuntimeException;
 use Throwable;
 
+/**
+ * @coversNothing
+ */
 class TemporaryTest extends TestCase
 {
     public static function setUpBeforeClass(): void

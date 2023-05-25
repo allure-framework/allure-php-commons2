@@ -35,10 +35,10 @@
   },
   "require-dev": {
     "jetbrains/phpstorm-attributes": "^1",
-    "phpunit/phpunit": "^9.5.10",
+    "phpunit/phpunit": "^9.6.8",
     "psalm/plugin-phpunit": "^0.18.4",
-    "squizlabs/php_codesniffer": "^3.7.1",
-    "vimeo/psalm": "^5.4"
+    "squizlabs/php_codesniffer": "^3.7.2",
+    "vimeo/psalm": "^5.12"
   },
   "autoload": {
     "psr-4": {
