@@ -32,6 +32,7 @@ final class Label implements JsonSerializable
     public const PACKAGE = "package";
     public const FRAMEWORK = "framework";
     public const LANGUAGE = "language";
+    public const LAYER = "layer";
 
     public function __construct(
         private ?string $name = null,
@@ -180,6 +181,14 @@ final class Label implements JsonSerializable
         return new self(
             name: self::LANGUAGE,
             value: $value ?? self::buildPhpVersion(),
+        );
+    }
+
+    public static function layer(?string $value): self
+    {
+        return new self(
+            name: self::LAYER,
+            value: $value,
         );
     }
 

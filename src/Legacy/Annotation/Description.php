@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Yandex\Allure\Adapter\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Required;
-use Qameta\Allure\Attribute\Description as QametaDescription;
+use Qameta\Allure\Attribute;
 use Qameta\Allure\Legacy\Annotation\LegacyAnnotationInterface;
 use Yandex\Allure\Adapter\Model\DescriptionType;
 
 /**
  * @Annotation
  * @Target({"CLASS", "METHOD"})
- * @deprecated Use native PHP attribute {@see \Qameta\Allure\Attribute\Description}
+ * @deprecated Use native PHP attribute {@see Attribute\Description}
  * @psalm-suppress MissingConstructor
  */
 class Description implements LegacyAnnotationInterface
@@ -29,10 +29,10 @@ class Description implements LegacyAnnotationInterface
      */
     public string $type = DescriptionType::TEXT;
 
-    public function convert(): QametaDescription
+    public function convert(): Attribute\Description
     {
         /** @psalm-suppress DeprecatedClass */
-        return new QametaDescription(
+        return new Attribute\Description(
             $this->value,
             DescriptionType::HTML == $this->type,
         );

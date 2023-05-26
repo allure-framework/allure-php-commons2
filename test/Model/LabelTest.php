@@ -49,7 +49,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::suite('a')->getValue());
     }
 
-    public function testParentSuite_Always_ResultHasSuiteName(): void
+    public function testParentSuite_Always_ResultHasParentSuiteName(): void
     {
         self::assertSame('parentSuite', Label::parentSuite(null)->getName());
     }
@@ -64,7 +64,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::parentSuite('a')->getValue());
     }
 
-    public function testSubSuite_Always_ResultHasSuiteName(): void
+    public function testSubSuite_Always_ResultHasSubSuiteName(): void
     {
         self::assertSame('subSuite', Label::subSuite(null)->getName());
     }
@@ -79,7 +79,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::subSuite('a')->getValue());
     }
 
-    public function testEpic_Always_ResultHasSuiteName(): void
+    public function testEpic_Always_ResultHasEpicName(): void
     {
         self::assertSame('epic', Label::epic(null)->getName());
     }
@@ -94,7 +94,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::epic('a')->getValue());
     }
 
-    public function testFeature_Always_ResultHasSuiteName(): void
+    public function testFeature_Always_ResultHasFeatureName(): void
     {
         self::assertSame('feature', Label::feature(null)->getName());
     }
@@ -109,7 +109,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::feature('a')->getValue());
     }
 
-    public function testStory_Always_ResultHasSuiteName(): void
+    public function testStory_Always_ResultHasStoryName(): void
     {
         self::assertSame('story', Label::story(null)->getName());
     }
@@ -124,7 +124,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::story('a')->getValue());
     }
 
-    public function testSeverity_Always_ResultHasSuiteName(): void
+    public function testSeverity_Always_ResultHasSeverityName(): void
     {
         self::assertSame('severity', Label::severity(Severity::trivial())->getName());
     }
@@ -135,7 +135,7 @@ class LabelTest extends TestCase
         self::assertSame('trivial', Label::severity($value)->getValue());
     }
 
-    public function testTag_Always_ResultHasSuiteName(): void
+    public function testTag_Always_ResultHasTagName(): void
     {
         self::assertSame('tag', Label::tag(null)->getName());
     }
@@ -150,7 +150,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::tag('a')->getValue());
     }
 
-    public function testOwner_Always_ResultHasSuiteName(): void
+    public function testOwner_Always_ResultHasOwnerName(): void
     {
         self::assertSame('owner', Label::owner(null)->getName());
     }
@@ -165,7 +165,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::owner('a')->getValue());
     }
 
-    public function testLead_Always_ResultHasSuiteName(): void
+    public function testLead_Always_ResultHasLeadName(): void
     {
         self::assertSame('lead', Label::lead(null)->getName());
     }
@@ -180,7 +180,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::lead('a')->getValue());
     }
 
-    public function testHost_Always_ResultHasSuiteName(): void
+    public function testHost_Always_ResultHasHostName(): void
     {
         self::assertSame('host', Label::host(null)->getName());
     }
@@ -195,7 +195,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::host('a')->getValue());
     }
 
-    public function testThread_Always_ResultHasSuiteName(): void
+    public function testThread_Always_ResultHasThreadName(): void
     {
         self::assertSame('thread', Label::thread(null)->getName());
     }
@@ -210,7 +210,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::thread('a')->getValue());
     }
 
-    public function testTestMethod_Always_ResultHasSuiteName(): void
+    public function testTestMethod_Always_ResultHasTestMethodName(): void
     {
         self::assertSame('testMethod', Label::testMethod(null)->getName());
     }
@@ -225,7 +225,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::testMethod('a')->getValue());
     }
 
-    public function testTestClass_Always_ResultHasSuiteName(): void
+    public function testTestClass_Always_ResultHasTestClassName(): void
     {
         self::assertSame('testClass', Label::testClass(null)->getName());
     }
@@ -240,7 +240,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::testClass('a')->getValue());
     }
 
-    public function testPackage_Always_ResultHasSuiteName(): void
+    public function testPackage_Always_ResultHasPackageName(): void
     {
         self::assertSame('package', Label::package(null)->getName());
     }
@@ -255,7 +255,7 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::package('a')->getValue());
     }
 
-    public function testFramework_Always_ResultHasSuiteName(): void
+    public function testFramework_Always_ResultHasFrameworkName(): void
     {
         self::assertSame('framework', Label::framework(null)->getName());
     }
@@ -270,12 +270,12 @@ class LabelTest extends TestCase
         self::assertSame('a', Label::framework('a')->getValue());
     }
 
-    public function testLanguage_Always_ResultHasSuiteName(): void
+    public function testLanguage_Always_ResultHasLanguageName(): void
     {
         self::assertSame('language', Label::language(null)->getName());
     }
 
-    public function testLanguage_GivenNull_ResultIsPhpWithCurrentVersion(): void
+    public function testLanguage_GivenNull_ResultHasPhpWithCurrentVersionValue(): void
     {
         $value = Label::language(null)->getValue();
         self::assertIsString($value);
@@ -285,6 +285,22 @@ class LabelTest extends TestCase
     public function testLanguage_GivenNotNull_ResultHasSameValue(): void
     {
         self::assertSame('a', Label::language('a')->getValue());
+    }
+
+    public function testLayer_Always_ResultHasLayerName(): void
+    {
+        self::assertSame('layer', Label::layer(null)->getName());
+    }
+
+    public function testLayer_GivenNull_ResultHasNullValue(): void
+    {
+        $value = Label::layer(null)->getValue();
+        self::assertNull($value);
+    }
+
+    public function testLayer_GivenNotNull_ResultHasSameValue(): void
+    {
+        self::assertSame('a', Label::layer('a')->getValue());
     }
 
     public function testGetName_ConstructedWithoutName_ReturnsNull(): void

@@ -7,6 +7,7 @@ namespace Qameta\Allure\Test\Attribute;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Attribute;
 use Qameta\Allure\Attribute\AttributeParser;
+use Qameta\Allure\Attribute\AttributeSetInterface;
 use Qameta\Allure\Setup\LinkTemplateCollectionInterface;
 
 use function json_encode;
@@ -82,6 +83,34 @@ EOF;
         );
     }
 
+    public function testGetLabels_ConstructedWithSetOfLabels_ReturnsMatchingLabelModelsInReverseOrder(): void
+    {
+        $attributeSet = $this->createStub(AttributeSetInterface::class);
+        $attributeSet
+            ->method('getAttributes')
+            ->willReturn(
+                [
+                    new Attribute\Label('a', 'b'),
+                    new Attribute\Label('c', 'd'),
+                ],
+            );
+        $parser = new AttributeParser(
+            attributes: [$attributeSet],
+            linkTemplates: $this->createStub(LinkTemplateCollectionInterface::class),
+        );
+
+        $expectedValue = <<<EOF
+[
+    {"name": "c", "value": "d"},
+    {"name": "a", "value": "b"}
+]
+EOF;
+        self::assertJsonStringEqualsJsonString(
+            $expectedValue,
+            json_encode($parser->getLabels()),
+        );
+    }
+
     public function testGetParameters_ConstructedWithoutParameterAttributes_ReturnsEmptyList(): void
     {
         $parser = new AttributeParser(
@@ -93,13 +122,41 @@ EOF;
         self::assertEmpty($parser->getParameters());
     }
 
-    public function testGetParameters_ConstructedWithParameterAttributes_ReturnsMatchingParamsInReverseOrder(): void
+    public function testGetParameters_ConstructedWithParameterAttributes_ReturnsMatchingParams(): void
     {
         $parser = new AttributeParser(
             attributes: [
                 new Attribute\Parameter('a', 'b', mode: Attribute\ParameterMode::HIDDEN),
                 new Attribute\Parameter('c', 'd', excluded: true),
             ],
+            linkTemplates: $this->createStub(LinkTemplateCollectionInterface::class),
+        );
+
+        $expectedValue = <<<EOF
+[
+    {"name": "a", "value": "b", "excluded": null, "mode": "hidden"},
+    {"name": "c", "value": "d", "excluded": true, "mode": null}
+]
+EOF;
+        self::assertJsonStringEqualsJsonString(
+            $expectedValue,
+            json_encode($parser->getParameters()),
+        );
+    }
+
+    public function testGetParameters_ConstructedWithSetOfParameters_ReturnsMatchingParams(): void
+    {
+        $attributeSet = $this->createStub(AttributeSetInterface::class);
+        $attributeSet
+            ->method('getAttributes')
+            ->willReturn(
+                [
+                    new Attribute\Parameter('a', 'b', mode: Attribute\ParameterMode::HIDDEN),
+                    new Attribute\Parameter('c', 'd', excluded: true),
+                ],
+            );
+        $parser = new AttributeParser(
+            attributes: [$attributeSet],
             linkTemplates: $this->createStub(LinkTemplateCollectionInterface::class),
         );
 

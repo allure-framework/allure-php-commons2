@@ -21,11 +21,14 @@ final class Label extends AbstractLabel
     public const TAG = Model\Label::TAG;
     public const OWNER = Model\Label::OWNER;
     public const LEAD = Model\Label::LEAD;
+    public const PACKAGE = Model\Label::PACKAGE;
+    public const LAYER = Model\Label::LAYER;
+
+    // Technical labels, set by framework automatically
     public const HOST = Model\Label::HOST;
     public const THREAD = Model\Label::THREAD;
     public const TEST_METHOD = Model\Label::TEST_METHOD;
     public const TEST_CLASS = Model\Label::TEST_CLASS;
-    public const PACKAGE = Model\Label::PACKAGE;
     public const FRAMEWORK = Model\Label::FRAMEWORK;
     public const LANGUAGE = Model\Label::LANGUAGE;
 }

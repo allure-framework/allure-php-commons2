@@ -18,6 +18,8 @@ use ReflectionMethod;
 use ReflectionProperty;
 
 use function array_merge;
+use function array_pop;
+use function array_push;
 use function array_reverse;
 use function is_string;
 
@@ -107,7 +109,12 @@ final class AttributeParser implements ModelProviderInterface
 
     private function processAnnotations(AttributeInterface ...$attributes): void
     {
-        foreach ($attributes as $attribute) {
+        while (!empty($attributes)) {
+            $attribute = array_shift($attributes);
+            if ($attribute instanceof AttributeSetInterface) {
+                array_unshift($attributes, ...$attribute->getAttributes());
+                continue;
+            }
             if ($attribute instanceof DisplayNameInterface) {
                 $this->displayName = $attribute->getValue();
             }

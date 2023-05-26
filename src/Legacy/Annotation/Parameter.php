@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Yandex\Allure\Adapter\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Required;
-use Qameta\Allure\Attribute\Parameter as QametaParameter;
+use Qameta\Allure\Attribute;
 use Qameta\Allure\Legacy\Annotation\LegacyAnnotationInterface;
 use Yandex\Allure\Adapter\Model\ParameterKind;
 
 /**
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})
- * @deprecated Use native PHP attribute {@see \Qameta\Allure\Attribute\Parameter}
+ * @deprecated Use native PHP attribute {@see Attribute\Parameter}
  * @psalm-suppress MissingConstructor
  */
 class Parameter implements LegacyAnnotationInterface
@@ -32,8 +32,8 @@ class Parameter implements LegacyAnnotationInterface
      */
     public string $kind = ParameterKind::ARGUMENT;
 
-    public function convert(): QametaParameter
+    public function convert(): Attribute\Parameter
     {
-        return new QametaParameter($this->name, $this->value);
+        return new Attribute\Parameter($this->name, $this->value);
     }
 }
