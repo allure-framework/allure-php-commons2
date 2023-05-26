@@ -193,6 +193,11 @@ final class Allure
         self::getInstance()->doLabel(Label::package($value));
     }
 
+    public static function layer(string $value): void
+    {
+        self::getInstance()->doLabel(Label::layer($value));
+    }
+
     public static function label(string $name, string $value): void
     {
         self::getInstance()->doLabel(

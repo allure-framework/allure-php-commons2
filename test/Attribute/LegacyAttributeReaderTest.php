@@ -9,9 +9,11 @@ use Doctrine\Common\Annotations\Reader;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Attribute\AttributeReader;
 use Qameta\Allure\Attribute\AttributeReaderInterface;
+use Qameta\Allure\Attribute\AttributeSetInterface;
 use Qameta\Allure\Attribute\Description;
 use Qameta\Allure\Attribute\DisplayName;
 use Qameta\Allure\Attribute\Feature;
+use Qameta\Allure\Attribute\Label;
 use Qameta\Allure\Attribute\LabelInterface;
 use Qameta\Allure\Attribute\LegacyAttributeReader;
 use Qameta\Allure\Attribute\Story;
@@ -267,6 +269,9 @@ class LegacyAttributeReaderTest extends TestCase
         $data = [
             'class' => $annotation::class,
         ];
+        if ($annotation instanceof AttributeSetInterface) {
+            $data['annotations'] = $this->exportAnnotations(...$annotation->getAttributes());
+        }
         if ($annotation instanceof NativePropertyAttribute) {
             $data['value'] = $annotation->getValue();
         }
