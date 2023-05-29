@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Attribute;
 
+use Qameta\Allure\Model\EnvProvider;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
@@ -42,6 +43,7 @@ interface AttributeReaderInterface
     /**
      * @param array $variables
      * @return list<AttributeInterface>
+     * @deprecated Use {@see EnvProvider} instead.
      */
     public function getEnvironmentAnnotations(array $variables): array;
 }
