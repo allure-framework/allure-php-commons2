@@ -12,7 +12,7 @@ final class StreamOpenFailedException extends RuntimeException
     public function __construct(
         private string $link,
         ?string $message = null,
-        Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct(
             $this->buildMessage($message),
