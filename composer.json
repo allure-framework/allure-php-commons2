@@ -37,7 +37,7 @@
     "jetbrains/phpstorm-attributes": "^1",
     "phpunit/phpunit": "^9.6.8",
     "psalm/plugin-phpunit": "^0.18.4",
-    "squizlabs/php_codesniffer": "^3.7.2",
+    "squizlabs/php_codesniffer": "^4.0.1",
     "vimeo/psalm": "^5.12"
   },
   "autoload": {
