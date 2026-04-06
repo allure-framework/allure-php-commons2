@@ -9,7 +9,7 @@ use Throwable;
 
 final class StreamWriteFailedException extends RuntimeException
 {
-    public function __construct(?string $message = null, Throwable $previous = null)
+    public function __construct(?string $message = null, ?Throwable $previous = null)
     {
         parent::__construct($this->buildMessage($message), 0, $previous);
     }
