@@ -15,7 +15,7 @@ trait AnnotationTestTrait
     /**
      * @template T of AttributeInterface
      * @param class-string<T> $attributeClass
-     * @param string          $methodName
+     * @param string $methodName
      * @return T
      */
     protected function getAttributeInstance(string $attributeClass, string $methodName): AttributeInterface
