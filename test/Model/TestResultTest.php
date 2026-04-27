@@ -8,6 +8,7 @@ use JsonException;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Model\TestResult;
 
+use function json_decode;
 use function json_encode;
 
 use const JSON_PRETTY_PRINT;
@@ -48,11 +49,12 @@ class TestResultTest extends TestCase
         self::assertEquals($titlePath, ["foo", "bar", "baz"]);
     }
 
-    public function testTitlePathJsonSerialization()
+    public function testTitlePathJsonSerialization(): void
     {
         $testResult = new TestResult("e42e48d0-7a3f-4fba-8518-8e6ada04af1d");
         $testResult->setTitlePath("foo", "bar", "baz");
 
+        /** @psalm-var object{titlePath: list<string>} $decodedJson */
         $decodedJson = json_decode(json_encode($testResult));
 
         self::assertEquals($decodedJson->titlePath, ["foo", "bar", "baz"]);
