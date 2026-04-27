@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Test\Model;
 
-use JsonException;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Model\TestResult;
 
 use function json_decode;
 use function json_encode;
-
-use const JSON_PRETTY_PRINT;
-use const JSON_THROW_ON_ERROR;
-use const JSON_UNESCAPED_UNICODE;
 
 /**
  * @covers \Qameta\Allure\Model\TestResult
