@@ -13,6 +13,7 @@ final class ResultType extends AbstractEnum
     private const STEP = 'step';
     private const ATTACHMENT = 'attachment';
     private const EXECUTABLE_CONTEXT = 'executable_context';
+    private const GLOBALS = 'globals';
 
     public static function unknown(): self
     {
@@ -47,5 +48,10 @@ final class ResultType extends AbstractEnum
     public static function executableContext(): self
     {
         return self::create(self::EXECUTABLE_CONTEXT);
+    }
+
+    public static function globals(): self
+    {
+        return self::create(self::GLOBALS);
     }
 }

@@ -90,7 +90,7 @@ class ResultFactoryTest extends TestCase
         );
     }
 
-    public function testCreateGlobalAttachment_WithSourceString_HasUuidSourceAndTimestamp(): void
+    public function testCreateGlobalAttachment_FactoryProvidesUuid_HasUuidAndTimestamp(): void
     {
         $uuidFactory = $this->createStub(UuidFactoryInterface::class);
         $uuid = Uuid::fromString("00000000-0000-0000-0000-000000000001");
@@ -105,5 +105,20 @@ class ResultFactoryTest extends TestCase
 
         self::assertEquals("00000000-0000-0000-0000-000000000001", $globalAttachment->getUuid());
         self::assertEquals($date, $globalAttachment->getTimestamp());
+    }
+
+    public function testCreateGlobals_FactoryProvidesUuid_ResultHasSameUuid(): void
+    {
+        $uuidFactory = $this->createStub(UuidFactoryInterface::class);
+        $uuid = Uuid::fromString("00000000-0000-0000-0000-000000000001");
+        $uuidFactory
+            ->method("uuid4")
+            ->willReturn($uuid);
+        $resultFactory = new ResultFactory($uuidFactory);
+
+        $globals = $resultFactory->createGlobals();
+
+
+        self::assertEquals("00000000-0000-0000-0000-000000000001", $globals->getUuid());
     }
 }

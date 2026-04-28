@@ -46,6 +46,11 @@ final class ResultFactory implements ResultFactoryInterface
         );
     }
 
+    public function createGlobals(): Globals
+    {
+        return new Globals(uuid: $this->createUuid());
+    }
+
     private function createUuid(): string
     {
         return $this
