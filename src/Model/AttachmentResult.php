@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Model;
 
-final class AttachmentResult extends Result
+class AttachmentResult extends Result
 {
     protected ?string $name = null;
 

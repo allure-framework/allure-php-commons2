@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Model\ResultFactory;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidFactoryInterface;
+use DateTimeImmutable;
 
 /**
  * @covers \Qameta\Allure\Model\ResultFactory
@@ -87,5 +88,22 @@ class ResultFactoryTest extends TestCase
             '00000000-0000-0000-0000-000000000001',
             $resultFactory->createAttachment()->getUuid(),
         );
+    }
+
+    public function testCreateGlobalAttachment_WithSourceString_HasUuidSourceAndTimestamp(): void
+    {
+        $uuidFactory = $this->createStub(UuidFactoryInterface::class);
+        $uuid = Uuid::fromString("00000000-0000-0000-0000-000000000001");
+        $uuidFactory
+            ->method("uuid4")
+            ->willReturn($uuid);
+        $resultFactory = new ResultFactory($uuidFactory);
+        $date = new DateTimeImmutable();
+
+        $globalAttachment = $resultFactory->createGlobalAttachment($date);
+
+
+        self::assertEquals("00000000-0000-0000-0000-000000000001", $globalAttachment->getUuid());
+        self::assertEquals($date, $globalAttachment->getTimestamp());
     }
 }

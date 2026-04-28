@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Qameta\Allure\Model;
 
 use Ramsey\Uuid\UuidFactoryInterface;
+use DateTimeImmutable;
 
 final class ResultFactory implements ResultFactoryInterface
 {
@@ -35,6 +36,14 @@ final class ResultFactory implements ResultFactoryInterface
     public function createAttachment(): AttachmentResult
     {
         return new AttachmentResult($this->createUuid());
+    }
+
+    public function createGlobalAttachment(DateTimeImmutable $timestamp): GlobalAttachment
+    {
+        return new GlobalAttachment(
+            uuid: $this->createUuid(),
+            timestamp: $timestamp,
+        );
     }
 
     private function createUuid(): string

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Model;
 
+use DateTimeImmutable;
+
 interface ResultFactoryInterface
 {
     public function createContainer(): ContainerResult;
@@ -15,4 +17,6 @@ interface ResultFactoryInterface
     public function createFixture(): FixtureResult;
 
     public function createAttachment(): AttachmentResult;
+
+    public function createGlobalAttachment(DateTimeImmutable $timestamp): GlobalAttachment;
 }
