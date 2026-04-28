@@ -138,6 +138,107 @@ final class Allure
             ->addAttachment($attachment, $dataSource);
     }
 
+    /**
+     * Writes a global attachment that isn't related to a particular test, step, or fixture.
+     */
+    public static function globalAttachment(
+        string $name,
+        string $content,
+        ?string $type = null,
+        ?string $fileExtension = null,
+    ): void {
+        self::getInstance()->doAddGlobalAttachment(
+            DataSourceFactory::fromString($content),
+            $name,
+            $type,
+            $fileExtension,
+        );
+    }
+
+    /**
+     * Writes a global attachment that isn't related to a particular test, step, or fixture.
+     */
+    public static function globalAttachmentFile(
+        string $name,
+        string $file,
+        ?string $type = null,
+        ?string $fileExtension = null
+    ): void {
+        self::getInstance()->doAddGlobalAttachment(
+            DataSourceFactory::fromFile($file),
+            $name,
+            $type,
+            $fileExtension,
+        );
+    }
+
+    private function doAddGlobalAttachment(
+        DataSourceInterface $dataSource,
+        string $name,
+        ?string $type = null,
+        ?string $fileExtension = null,
+    ): void {
+        $factory = self::getInstance()
+            ->getLifecycleConfig()
+            ->getResultFactory();
+
+        $attachment = $factory
+            ->createGlobalAttachment()
+            ->setName($name)
+            ->setType($type)
+            ->setFileExtension($fileExtension);
+
+        $globals = $factory
+            ->createGlobals()
+            ->addAttachment($attachment);
+
+        $lifecycle = $this->doGetLifecycle();
+
+        $lifecycle->addGlobalAttachment($attachment, $dataSource);
+        $lifecycle->addGlobals($globals);
+    }
+
+    /**
+     * Writes a global error that isn't related to a specific test, step, or fixture.
+     * If an exception instance is provided, fills the message and trace from it.
+     * Otherwise, a string message must be provided, optionally followed by a trace.
+     *
+     * @param $value An exception
+     */
+    public static function globalError(Throwable|string $value, ?string $trace = null): void
+    {
+        $instance = self::getInstance();
+        $lifecycleBuilder = $instance->getLifecycleConfig();
+
+        if ($value instanceof Throwable) {
+            $statusDetails = $lifecycleBuilder
+                ->getStatusDetector()
+                ->getStatusDetails($value);
+
+            $message = $statusDetails?->getMessage();
+            $trace = $statusDetails?->getTrace();
+        } else {
+            $message = $value;
+        }
+
+        $factory = self::getInstance()
+            ->getLifecycleConfig()
+            ->getResultFactory();
+
+        $error = $factory
+            ->createGlobalError()
+            ->setMessage($message)
+            ->setTrace($trace);
+
+        $globals = $factory
+            ->createGlobals()
+            ->addError($error);
+
+        $instance
+            ->doGetLifecycle()
+            ->addGlobals($globals);
+    }
+
     public static function epic(string $value): void
     {
         self::getInstance()->doLabel(Label::epic($value));
