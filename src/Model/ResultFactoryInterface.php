@@ -18,5 +18,9 @@ interface ResultFactoryInterface
 
     public function createAttachment(): AttachmentResult;
 
-    public function createGlobalAttachment(DateTimeImmutable $timestamp): GlobalAttachment;
+    public function createGlobalError(): GlobalError;
+
+    public function createGlobalAttachment(): GlobalAttachment;
+
+    public function createGlobals(): Globals;
 }
