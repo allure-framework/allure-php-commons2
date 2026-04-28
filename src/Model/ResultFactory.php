@@ -13,8 +13,7 @@ final class ResultFactory implements ResultFactoryInterface
     public function __construct(
         private UuidFactoryInterface $uuidFactory,
         private ClockInterface $clock,
-    )
-    {
+    ) {
     }
 
     public function createContainer(): ContainerResult

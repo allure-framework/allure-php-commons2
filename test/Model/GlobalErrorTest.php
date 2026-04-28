@@ -77,9 +77,7 @@ class GlobalErrorTest extends TestCase
          */
         $date = DateTimeImmutable::createFromFormat(
             DateTimeInterface::ISO8601,
-
-            // 1577874031000 milliseconds since epoch
-            "2020-01-01T10:20:31+00:00",
+            "2020-01-01T10:20:31+00:00", // 1577874031000 milliseconds since epoch
         );
         $globalError = new GlobalError(
             timestamp: $date,

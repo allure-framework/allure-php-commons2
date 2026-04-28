@@ -163,13 +163,10 @@ class GlobalsTest extends TestCase
          */
         $date1 = DateTimeImmutable::createFromFormat(
             DateTimeInterface::ISO8601,
-
-            // 1577874031000 milliseconds since epoch
-            "2020-01-01T10:20:31+00:00",
+            "2020-01-01T10:20:31+00:00", // 1577874031000 milliseconds since epoch
         );
 
-        // 1577874061000 milliseconds since epoch
-        $date2 = $date1->modify("+30 seconds");
+        $date2 = $date1->modify("+30 seconds"); // 1577874061000 milliseconds since epoch
 
         $globals = new Globals("-");
 
