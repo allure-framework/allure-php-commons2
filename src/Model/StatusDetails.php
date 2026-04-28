@@ -6,7 +6,7 @@ namespace Qameta\Allure\Model;
 
 use JsonSerializable;
 
-final class StatusDetails implements JsonSerializable
+class StatusDetails implements JsonSerializable
 {
     use JsonSerializableTrait;
 
