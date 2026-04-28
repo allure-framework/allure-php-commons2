@@ -242,7 +242,7 @@ class AllureTest extends TestCase
     }
 
     #[DisplayName('b')]
-    public function titledStep(): void
+    public function titledStep(StepContextInterface $_): void
     {
     }
 
@@ -293,7 +293,7 @@ class AllureTest extends TestCase
     }
 
     #[Parameter('b', 'c')]
-    public function parametrizedStep(): void
+    public function parametrizedStep(StepContextInterface $_): void
     {
     }
 

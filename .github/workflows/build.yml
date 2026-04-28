@@ -30,18 +30,19 @@ jobs:
           - "--prefer-lowest"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v6
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-        
       - name: Set up PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          tools: composer:v2
           extensions: pcntl, posix
           coverage: xdebug
           ini-values: error_reporting=E_ALL
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
 
       - name: Install dependencies
         run: composer update

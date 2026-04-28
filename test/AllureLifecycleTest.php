@@ -875,7 +875,6 @@ class AllureLifecycleTest extends TestCase
             ->with(
                 self::callback(
                     function (AttachmentResult $attachmentResult) use (&$removeAttachmentResults): bool {
-                        /** @psalm-var list<AttachmentResult> $removeAttachmentResults */
                         $removeAttachmentResults[] = $attachmentResult;
 
                         return true;
@@ -889,7 +888,6 @@ class AllureLifecycleTest extends TestCase
             ->with(
                 self::callback(
                     function (TestResult $testResult) use (&$removeTestResults): bool {
-                        /** @psalm-var list<TestResult> $removeTestResults */
                         $removeTestResults[] = $testResult;
 
                         return true;
@@ -2752,7 +2750,6 @@ class AllureLifecycleTest extends TestCase
             ->with(
                 self::callback(
                     function (AttachmentResult $attachmentResult) use (&$removeAttachmentResults): bool {
-                        /** @psalm-var list<AttachmentResult> $removeAttachmentResults */
                         $removeAttachmentResults[] = $attachmentResult;
 
                         return true;
