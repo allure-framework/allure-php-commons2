@@ -24,7 +24,7 @@ class StatusDetails implements JsonSerializable
         return $this->known;
     }
 
-    public function makeKnown(?bool $known): self
+    public function makeKnown(?bool $known): static
     {
         $this->known = $known;
 
@@ -36,7 +36,7 @@ class StatusDetails implements JsonSerializable
         return $this->muted;
     }
 
-    public function makeMuted(?bool $muted): self
+    public function makeMuted(?bool $muted): static
     {
         $this->muted = $muted;
 
@@ -48,7 +48,7 @@ class StatusDetails implements JsonSerializable
         return $this->flaky;
     }
 
-    public function makeFlaky(?bool $flaky): self
+    public function makeFlaky(?bool $flaky): static
     {
         $this->flaky = $flaky;
 
@@ -60,7 +60,7 @@ class StatusDetails implements JsonSerializable
         return $this->message;
     }
 
-    public function setMessage(?string $message): self
+    public function setMessage(?string $message): static
     {
         $this->message = $message;
 
@@ -72,7 +72,7 @@ class StatusDetails implements JsonSerializable
         return $this->trace;
     }
 
-    public function setTrace(?string $trace): self
+    public function setTrace(?string $trace): static
     {
         $this->trace = $trace;
 
