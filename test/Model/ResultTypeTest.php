@@ -89,4 +89,15 @@ class ResultTypeTest extends TestCase
     {
         self::assertSame('executable_context', (string) ResultType::executableContext());
     }
+
+    public function testGlobals_CalledTwice_ReturnsSameInstance(): void
+    {
+        $resultType = ResultType::globals();
+        self::assertSame($resultType, ResultType::globals());
+    }
+
+    public function testGlobals_CastedToString_ReturnsMatchingValue(): void
+    {
+        self::assertSame('globals', (string) ResultType::globals());
+    }
 }

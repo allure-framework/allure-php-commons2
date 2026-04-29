@@ -22,7 +22,7 @@ class TestResultTest extends TestCase
 
         $titlePath = $testResult->getTitlePath();
 
-        self::assertEquals($titlePath, []);
+        self::assertEquals([], $titlePath);
     }
 
     public function testSetTitlePathReturnsObjectItself(): void
@@ -31,7 +31,7 @@ class TestResultTest extends TestCase
 
         $actual = $testResult->setTitlePath();
 
-        self::assertSame($actual, $testResult);
+        self::assertSame($testResult, $actual);
     }
 
     public function testTitlePathCanBeSet(): void
@@ -41,7 +41,7 @@ class TestResultTest extends TestCase
 
         $titlePath = $testResult->getTitlePath();
 
-        self::assertEquals($titlePath, ["foo", "bar", "baz"]);
+        self::assertEquals(["foo", "bar", "baz"], $titlePath);
     }
 
     public function testTitlePathJsonSerialization(): void
@@ -52,6 +52,6 @@ class TestResultTest extends TestCase
         /** @psalm-var object{titlePath: list<string>} $decodedJson */
         $decodedJson = json_decode(json_encode($testResult));
 
-        self::assertEquals($decodedJson->titlePath, ["foo", "bar", "baz"]);
+        self::assertEquals(["foo", "bar", "baz"], $decodedJson->titlePath);
     }
 }

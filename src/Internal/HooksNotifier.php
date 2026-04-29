@@ -13,6 +13,7 @@ use Qameta\Allure\Hook\AfterContainerWriteHookInterface;
 use Qameta\Allure\Hook\AfterFixtureStartHookInterface;
 use Qameta\Allure\Hook\AfterFixtureStopHookInterface;
 use Qameta\Allure\Hook\AfterFixtureUpdateHookInterface;
+use Qameta\Allure\Hook\AfterGlobalsWriteHookInterface;
 use Qameta\Allure\Hook\AfterStepStartHookInterface;
 use Qameta\Allure\Hook\AfterStepStopHookInterface;
 use Qameta\Allure\Hook\AfterStepUpdateHookInterface;
@@ -29,6 +30,7 @@ use Qameta\Allure\Hook\BeforeContainerWriteHookInterface;
 use Qameta\Allure\Hook\BeforeFixtureStartHookInterface;
 use Qameta\Allure\Hook\BeforeFixtureStopHookInterface;
 use Qameta\Allure\Hook\BeforeFixtureUpdateHookInterface;
+use Qameta\Allure\Hook\BeforeGlobalsWriteHookInterface;
 use Qameta\Allure\Hook\BeforeStepStartHookInterface;
 use Qameta\Allure\Hook\BeforeStepStopHookInterface;
 use Qameta\Allure\Hook\BeforeStepUpdateHookInterface;
@@ -42,6 +44,7 @@ use Qameta\Allure\Hook\OnLifecycleErrorHookInterface;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
 use Qameta\Allure\Model\FixtureResult;
+use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\ResultType;
 use Qameta\Allure\Model\StepResult;
 use Qameta\Allure\Model\TestResult;
@@ -360,6 +363,24 @@ final class HooksNotifier implements HooksNotifierInterface
             ResultType::unknown(),
             OnLifecycleErrorHookInterface::class,
             static fn (OnLifecycleErrorHookInterface $hook) => $hook->onLifecycleError($error),
+        );
+    }
+
+    public function beforeGlobalsWrite(Globals $globals): void
+    {
+        $this->forEachHook(
+            $globals->getResultType(),
+            BeforeGlobalsWriteHookInterface::class,
+            static fn (BeforeGlobalsWriteHookInterface $hook) => $hook->beforeGlobalsWrite($globals),
+        );
+    }
+
+    public function afterGlobalsWrite(Globals $globals): void
+    {
+        $this->forEachHook(
+            $globals->getResultType(),
+            AfterGlobalsWriteHookInterface::class,
+            static fn (AfterGlobalsWriteHookInterface $hook) => $hook->afterGlobalsWrite($globals),
         );
     }
 

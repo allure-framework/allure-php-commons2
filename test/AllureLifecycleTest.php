@@ -25,6 +25,8 @@ use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
 use Qameta\Allure\Model\ExecutionContextInterface;
 use Qameta\Allure\Model\FixtureResult;
+use Qameta\Allure\Model\GlobalAttachment;
+use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\Stage;
 use Qameta\Allure\Model\StepResult;
 use Qameta\Allure\Model\StorableResultInterface;
@@ -4439,6 +4441,133 @@ class AllureLifecycleTest extends TestCase
             ->method('writeAttachment')
             ->with(self::identicalTo($attachment), self::identicalTo($data));
         $lifecycle->addAttachment($attachment, $data);
+    }
+
+    public function testAddGlobalAttachment_AttachmentNotExcluded_WriterWritesSameAttachmentWithGivenData(): void
+    {
+        $resultsWriter = $this->createMock(ResultsWriterInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $resultsWriter,
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createMock(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $attachment = new GlobalAttachment(uuid: '-', timestamp: new DateTimeImmutable());
+        $data = $this->createStub(DataSourceInterface::class);
+        $resultsWriter
+            ->expects(self::once())
+            ->method('writeAttachment')
+            ->with(self::identicalTo($attachment), self::identicalTo($data));
+        $lifecycle->addGlobalAttachment($attachment, $data);
+    }
+
+    public function testAddGlobals_NoExceptionThrownDuringWrite_NotifiesHooksWithoutError(): void
+    {
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $this->createStub(ResultsWriterInterface::class),
+            $hooksNotifier,
+            $this->createMock(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $globals = new Globals('-');
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeGlobalsWrite')
+            ->with(self::identicalTo($globals));
+        $hooksNotifier
+            ->expects(self::never())
+            ->method('onLifecycleError');
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('before')
+            ->method('afterGlobalsWrite')
+            ->with(self::identicalTo($globals));
+        $lifecycle->addGlobals($globals);
+    }
+
+    public function testAddGlobals_ExceptionThrownDuringWrite_NotifiesHooksWithError(): void
+    {
+        $error = new Exception();
+        $resultsWriter = $this->createStub(ResultsWriterInterface::class);
+        $resultsWriter
+            ->method('writeGlobals')
+            ->willThrowException($error);
+        $hooksNotifier = $this->createMock(HooksNotifierInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $resultsWriter,
+            $hooksNotifier,
+            $this->createMock(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $globals = new Globals('-');
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('before')
+            ->method('beforeGlobalsWrite')
+            ->with(self::identicalTo($globals));
+        $hooksNotifier
+            ->expects(self::once())
+            ->id('error')
+            ->after('before')
+            ->method('onLifecycleError')
+            ->with(self::identicalTo($error));
+        $hooksNotifier
+            ->expects(self::once())
+            ->after('error')
+            ->method('afterGlobalsWrite')
+            ->with(self::identicalTo($globals));
+        $lifecycle->addGlobals($globals);
+    }
+
+    public function testAddGlobals_WriterWritesObject(): void
+    {
+        $resultsWriter = $this->createMock(ResultsWriterInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $resultsWriter,
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createMock(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $globals = new Globals("-");
+        $resultsWriter
+            ->expects(self::once())
+            ->method('writeGlobals')
+            ->with(self::identicalTo($globals));
+        $lifecycle->addGlobals($globals);
+    }
+
+    public function testAddGlobals_Excluded_ShouldNotBeWritten(): void
+    {
+        $resultsWriter = $this->createMock(ResultsWriterInterface::class);
+        $lifecycle = new AllureLifecycle(
+            $this->createStub(LoggerInterface::class),
+            $this->createClock(),
+            $resultsWriter,
+            $this->createStub(HooksNotifierInterface::class),
+            $this->createMock(ResultStorageInterface::class),
+            new ThreadContext(),
+        );
+
+        $globals = new Globals("-");
+        $globals->setExcluded(true);
+        $resultsWriter
+            ->expects(self::never())
+            ->method('writeGlobals');
+        $lifecycle->addGlobals($globals);
     }
 
     public function testAddAttachment_AttachmentExcluded_WriterNeverWritesAttachment(): void

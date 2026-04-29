@@ -98,6 +98,7 @@ final class LifecycleBuilder implements LifecycleBuilderInterface
     {
         return $this->resultFactory ??= new ResultFactory(
             $this->getUuidFactory(),
+            $this->getClock(),
         );
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Test;
 
+use DateTimeImmutable;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Allure;
@@ -15,6 +16,9 @@ use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Io\StreamDataSource;
 use Qameta\Allure\Io\StringDataSource;
 use Qameta\Allure\Model\AttachmentResult;
+use Qameta\Allure\Model\GlobalAttachment;
+use Qameta\Allure\Model\GlobalError;
+use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\ParameterMode;
 use Qameta\Allure\Model\ResultFactoryInterface;
@@ -480,6 +484,211 @@ class AllureTest extends TestCase
                 self::isInstanceOf(StreamDataSource::class),
             );
         Allure::attachmentFile('b', 'c');
+    }
+
+    /**
+     * @dataProvider providerAttachmentProperties
+     */
+    public function testGlobalAttachment_ResultFactoryProvidesAttachment_AttachmentAndGlobalsHaveGivenProperties(
+        string $name,
+        ?string $type,
+        ?string $fileExtension,
+    ): void {
+        $attachment = new GlobalAttachment(
+            uuid: '-',
+            timestamp: new DateTimeImmutable(),
+        );
+        $globals = new Globals("-");
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalAttachment($attachment, $globals),
+            ),
+        );
+
+        Allure::globalAttachment($name, 'b', $type, $fileExtension);
+
+        self::assertSame($name, $attachment->getName());
+        self::assertSame($type, $attachment->getType());
+        self::assertSame($fileExtension, $attachment->getFileExtension());
+        self::assertEquals([$attachment], $globals->getAttachments());
+    }
+
+    public function testGlobalAttachment_ResultFactoryProvidesAttachment_AttachmentAndGlobalsAreAddedToLifecycle(): void
+    {
+        $attachment = new GlobalAttachment(
+            uuid: '-',
+            timestamp: new DateTimeImmutable(),
+        );
+        $globals = new Globals("-");
+        $lifecycle = $this->createMock(AllureLifecycleInterface::class);
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalAttachment($attachment, $globals),
+                $lifecycle,
+            ),
+        );
+
+        $lifecycle
+            ->expects(self::once())
+            ->method('addGlobalAttachment')
+            ->with(
+                self::identicalTo($attachment),
+                self::isInstanceOf(StringDataSource::class),
+            );
+        $lifecycle
+            ->expects(self::once())
+            ->method('addGlobals')
+            ->with(
+                self::identicalTo($globals),
+            );
+
+        Allure::globalAttachment('b', 'c');
+    }
+
+    /**
+     * @dataProvider providerAttachmentProperties
+     */
+    public function testGlobalAttachmentFile_ResultFactoryProvidesAttachment_AttachmentAndGlobalsHaveGivenProperties(
+        string $name,
+        ?string $type,
+        ?string $fileExtension,
+    ): void {
+        $attachment = new GlobalAttachment(
+            uuid: "-",
+            timestamp: new DateTimeImmutable(),
+        );
+        $globals = new Globals("-");
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalAttachment($attachment, $globals),
+            ),
+        );
+
+        Allure::globalAttachmentFile($name, "b", $type, $fileExtension);
+
+        self::assertSame($name, $attachment->getName());
+        self::assertSame($type, $attachment->getType());
+        self::assertSame($fileExtension, $attachment->getFileExtension());
+        self::assertEquals([$attachment], $globals->getAttachments());
+    }
+
+    public function testGlobalAttachmentFile_ResultFactoryProvidesAttachment_ObjsAddedToLifecycle(): void
+    {
+        $attachment = new GlobalAttachment(
+            uuid: "-",
+            timestamp: new DateTimeImmutable(),
+        );
+        $globals = new Globals("-");
+        $lifecycle = $this->createMock(AllureLifecycleInterface::class);
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalAttachment($attachment, $globals),
+                $lifecycle,
+            ),
+        );
+
+        $lifecycle
+            ->expects(self::once())
+            ->method('addGlobalAttachment')
+            ->with(
+                self::identicalTo($attachment),
+                self::isInstanceOf(StreamDataSource::class),
+            );
+        $lifecycle
+            ->expects(self::once())
+            ->method('addGlobals')
+            ->with(
+                self::identicalTo($globals),
+            );
+
+        Allure::globalAttachmentFile("b", "c");
+    }
+
+    public function testGlobalError_FromException_HasMessageAndTraceFromException(): void
+    {
+        $error = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+        $exception = new Exception();
+        $statusDetector = $this->createMock(StatusDetectorInterface::class);
+        $statusDetails = new StatusDetails();
+        $statusDetails
+            ->setMessage("foo")
+            ->setTrace("bar");
+        $statusDetector
+            ->method('getStatusDetails')
+            ->with(self::identicalTo($exception))
+            ->willReturn($statusDetails);
+
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                resultFactory: $this->createResultFactoryWithGlobalError($error, $globals),
+                statusDetector: $statusDetector,
+            ),
+        );
+
+        Allure::globalError($exception);
+
+        self::assertEquals("foo", $error->getMessage());
+        self::assertEquals("bar", $error->getTrace());
+        self::assertEquals([$error], $globals->getErrors());
+    }
+
+    public function testGlobalError_FromStrings_HasMessageAndTrace(): void
+    {
+        $error = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalError($error, $globals),
+            ),
+        );
+
+        Allure::globalError("foo", "bar");
+
+        self::assertEquals("foo", $error->getMessage());
+        self::assertEquals("bar", $error->getTrace());
+        self::assertEquals([$error], $globals->getErrors());
+    }
+
+    public function testGlobalError_FromSingleString_HasMessageAndTrace(): void
+    {
+        $error = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalError($error, $globals),
+            ),
+        );
+
+        Allure::globalError("foo");
+
+        self::assertEquals("foo", $error->getMessage());
+        self::assertNull($error->getTrace());
+        self::assertEquals([$error], $globals->getErrors());
+    }
+
+    public function testGlobalError_ResultFactoryProvidesErrort_GlobalsAddedToLifecycle(): void
+    {
+        $attachment = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+        $lifecycle = $this->createMock(AllureLifecycleInterface::class);
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalError($attachment, $globals),
+                $lifecycle,
+            ),
+        );
+
+        $lifecycle
+            ->expects(self::once())
+            ->method('addGlobals')
+            ->with(
+                self::identicalTo($globals),
+            );
+
+        Allure::globalError("foo", "bar");
     }
 
     public function testEpic_GivenValue_TestHasMatchingLabel(): void
@@ -1086,6 +1295,38 @@ class AllureTest extends TestCase
 
         return $resultFactory;
     }
+
+
+    private function createResultFactoryWithGlobalAttachment(
+        GlobalAttachment $attachment,
+        Globals $globals
+    ): ResultFactoryInterface {
+        $resultFactory = $this->createStub(ResultFactoryInterface::class);
+        $resultFactory
+            ->method('createGlobalAttachment')
+            ->willReturn($attachment);
+        $resultFactory
+            ->method('createGlobals')
+            ->willReturn($globals);
+
+        return $resultFactory;
+    }
+
+    private function createResultFactoryWithGlobalError(
+        GlobalError $error,
+        Globals $globals
+    ): ResultFactoryInterface {
+        $resultFactory = $this->createStub(ResultFactoryInterface::class);
+        $resultFactory
+            ->method('createGlobalError')
+            ->willReturn($error);
+        $resultFactory
+            ->method('createGlobals')
+            ->willReturn($globals);
+
+        return $resultFactory;
+    }
+
 
     private function createResultFactoryWithTest(TestResult $test): ResultFactoryInterface
     {
