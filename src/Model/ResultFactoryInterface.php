@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Model;
 
-use DateTimeImmutable;
-
 interface ResultFactoryInterface
 {
     public function createContainer(): ContainerResult;
