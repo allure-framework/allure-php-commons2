@@ -202,8 +202,6 @@ final class Allure
      * Writes a global error that isn't related to a specific test, step, or fixture.
      * If an exception instance is provided, fills the message and trace from it.
      * Otherwise, a string message must be provided, optionally followed by a trace.
-     *
-     * @param $value An exception
      */
     public static function globalError(Throwable|string $value, ?string $trace = null): void
     {
