@@ -219,7 +219,7 @@ final class Allure
             $message = $value;
         }
 
-        $factory = self::getInstance()
+        $factory = $instance
             ->getLifecycleConfig()
             ->getResultFactory();
 
