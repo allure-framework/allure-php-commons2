@@ -12,6 +12,7 @@ use Qameta\Allure\Hook\AfterContainerWriteHookInterface;
 use Qameta\Allure\Hook\AfterFixtureStartHookInterface;
 use Qameta\Allure\Hook\AfterFixtureStopHookInterface;
 use Qameta\Allure\Hook\AfterFixtureUpdateHookInterface;
+use Qameta\Allure\Hook\AfterGlobalsWriteHookInterface;
 use Qameta\Allure\Hook\AfterStepStartHookInterface;
 use Qameta\Allure\Hook\AfterStepStopHookInterface;
 use Qameta\Allure\Hook\AfterStepUpdateHookInterface;
@@ -28,6 +29,7 @@ use Qameta\Allure\Hook\BeforeContainerWriteHookInterface;
 use Qameta\Allure\Hook\BeforeFixtureStartHookInterface;
 use Qameta\Allure\Hook\BeforeFixtureStopHookInterface;
 use Qameta\Allure\Hook\BeforeFixtureUpdateHookInterface;
+use Qameta\Allure\Hook\BeforeGlobalsWriteHookInterface;
 use Qameta\Allure\Hook\BeforeStepStartHookInterface;
 use Qameta\Allure\Hook\BeforeStepStopHookInterface;
 use Qameta\Allure\Hook\BeforeStepUpdateHookInterface;
@@ -71,6 +73,8 @@ interface HooksNotifierInterface extends
     AfterStepStopHookInterface,
     BeforeAttachmentWriteHookInterface,
     AfterAttachmentWriteHookInterface,
-    OnLifecycleErrorHookInterface
+    OnLifecycleErrorHookInterface,
+    BeforeGlobalsWriteHookInterface,
+    AfterGlobalsWriteHookInterface
 {
 }

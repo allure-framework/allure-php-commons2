@@ -30,8 +30,9 @@ trait JsonSerializableTrait
      */
     final public function jsonSerialize(): array
     {
+        $thisObjectVars = get_object_vars($this);
         $includedProperties = array_filter(
-            get_object_vars($this),
+            $thisObjectVars,
             fn (string $key): bool => !in_array($key, $this->excludeFromSerialization(), true),
             ARRAY_FILTER_USE_KEY,
         );

@@ -7,6 +7,8 @@ namespace Qameta\Allure;
 use Qameta\Allure\Io\DataSourceInterface;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
+use Qameta\Allure\Model\GlobalAttachment;
+use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\FixtureResult;
 use Qameta\Allure\Model\StepResult;
 use Qameta\Allure\Model\TestResult;
@@ -56,4 +58,8 @@ interface AllureLifecycleInterface
     public function stopStep(?string $uuid = null): ?string;
 
     public function addAttachment(AttachmentResult $attachment, DataSourceInterface $data): void;
+
+    public function addGlobalAttachment(GlobalAttachment $attachment, DataSourceInterface $data): void;
+
+    public function addGlobals(Globals $globals): void;
 }

@@ -15,4 +15,10 @@ interface ResultFactoryInterface
     public function createFixture(): FixtureResult;
 
     public function createAttachment(): AttachmentResult;
+
+    public function createGlobalError(): GlobalError;
+
+    public function createGlobalAttachment(): GlobalAttachment;
+
+    public function createGlobals(): Globals;
 }

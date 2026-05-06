@@ -13,6 +13,7 @@ use Qameta\Allure\Io\Exception\StreamCopyFailedException;
 use Qameta\Allure\Io\Exception\StreamOpenFailedException;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
+use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\TestResult;
 use Throwable;
 
@@ -44,6 +45,8 @@ class FileSystemResultsWriter implements ResultsWriterInterface
     private const RESULT_FILE_POSTFIX = '-result' . self::FILE_EXTENSION;
 
     private const CONTAINER_FILE_POSTFIX = '-container' . self::FILE_EXTENSION;
+
+    private const GLOBALS_FILE_POSTFIX = '-globals' . self::FILE_EXTENSION;
 
     private string $outputDirectory;
 
@@ -80,6 +83,14 @@ class FileSystemResultsWriter implements ResultsWriterInterface
         $source = $this->getAttachmentSource($attachment);
         $attachment->setSource($source);
         $this->write($source, $data);
+    }
+
+    public function writeGlobals(Globals $globals): void
+    {
+        $this->write(
+            $globals->getUuid() . self::GLOBALS_FILE_POSTFIX,
+            DataSourceFactory::fromSerializable($globals),
+        );
     }
 
     public function removeAttachment(AttachmentResult $attachment): void

@@ -17,6 +17,11 @@ final class TestResult extends ExecutionContext
     protected ?string $fullName = null;
 
     /**
+     * @var list<string>
+     */
+    protected array $titlePath = [];
+
+    /**
      * @var list<Label>
      */
     protected array $labels = [];
@@ -75,6 +80,21 @@ final class TestResult extends ExecutionContext
     public function setFullName(?string $fullName): self
     {
         $this->fullName = $fullName;
+
+        return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getTitlePath(): array
+    {
+        return $this->titlePath;
+    }
+
+    public function setTitlePath(string ...$items): self
+    {
+        $this->titlePath = array_values($items);
 
         return $this;
     }

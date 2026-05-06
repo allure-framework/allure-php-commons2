@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Qameta\Allure\Model;
 
 use Ramsey\Uuid\UuidFactoryInterface;
+use Qameta\Allure\Io\ClockInterface;
+use DateTimeImmutable;
 
 final class ResultFactory implements ResultFactoryInterface
 {
-    public function __construct(private UuidFactoryInterface $uuidFactory)
-    {
+    public function __construct(
+        private UuidFactoryInterface $uuidFactory,
+        private ClockInterface $clock,
+    ) {
     }
 
     public function createContainer(): ContainerResult
@@ -37,11 +41,36 @@ final class ResultFactory implements ResultFactoryInterface
         return new AttachmentResult($this->createUuid());
     }
 
+    public function createGlobalError(): GlobalError
+    {
+        return new GlobalError(
+            timestamp: $this->now(),
+        );
+    }
+
+    public function createGlobalAttachment(): GlobalAttachment
+    {
+        return new GlobalAttachment(
+            uuid: $this->createUuid(),
+            timestamp: $this->now(),
+        );
+    }
+
+    public function createGlobals(): Globals
+    {
+        return new Globals(uuid: $this->createUuid());
+    }
+
     private function createUuid(): string
     {
         return $this
             ->uuidFactory
             ->uuid4()
             ->toString();
+    }
+
+    private function now(): DateTimeImmutable
+    {
+        return $this->clock->now();
     }
 }

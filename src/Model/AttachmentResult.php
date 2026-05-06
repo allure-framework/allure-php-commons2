@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Qameta\Allure\Model;
 
-final class AttachmentResult extends Result
+class AttachmentResult extends Result
 {
     protected ?string $name = null;
 
@@ -24,7 +24,7 @@ final class AttachmentResult extends Result
         return $this->name;
     }
 
-    public function setName(?string $name): self
+    public function setName(?string $name): static
     {
         $this->name = $name;
 
@@ -36,7 +36,7 @@ final class AttachmentResult extends Result
         return $this->source;
     }
 
-    public function setSource(?string $source): self
+    public function setSource(?string $source): static
     {
         $this->source = $source;
 
@@ -48,7 +48,7 @@ final class AttachmentResult extends Result
         return $this->type;
     }
 
-    public function setType(?string $type): self
+    public function setType(?string $type): static
     {
         $this->type = $type;
         return $this;
@@ -59,7 +59,7 @@ final class AttachmentResult extends Result
         return $this->fileExtension;
     }
 
-    public function setFileExtension(?string $fileExtension): self
+    public function setFileExtension(?string $fileExtension): static
     {
         $this->fileExtension = $fileExtension;
 

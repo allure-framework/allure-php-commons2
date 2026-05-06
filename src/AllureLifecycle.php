@@ -18,6 +18,8 @@ use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\ContainerResult;
 use Qameta\Allure\Model\ExecutionContextInterface;
+use Qameta\Allure\Model\GlobalAttachment;
+use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\FixtureResult;
 use Qameta\Allure\Model\ResultInterface;
 use Qameta\Allure\Model\Stage;
@@ -547,6 +549,38 @@ final class AllureLifecycle implements AllureLifecycleInterface
 
             return;
         }
+
+        $this->writeAttachment($attachment, $data, $context->getUuid());
+    }
+
+    public function addGlobalAttachment(GlobalAttachment $attachment, DataSourceInterface $data): void
+    {
+        $this->writeAttachment($attachment, $data);
+    }
+
+    public function addGlobals(Globals $globals): void
+    {
+        $this->notifier->beforeGlobalsWrite($globals);
+        try {
+            if (!$globals->getExcluded()) {
+                $this->resultsWriter->writeGlobals($globals);
+            }
+        } catch (Throwable $e) {
+            $this->logException(
+                'Globals (UUID: {uuid}) not added',
+                $e,
+                ['uuid' => $globals->getUuid()],
+            );
+            $this->notifier->onLifecycleError($e);
+        }
+        $this->notifier->afterGlobalsWrite($globals);
+    }
+
+    private function writeAttachment(
+        AttachmentResult $attachment,
+        DataSourceInterface $data,
+        ?string $parentUuid = null
+    ): void {
         $this->notifier->beforeAttachmentWrite($attachment);
         try {
             if (!$attachment->getExcluded()) {
@@ -556,7 +590,7 @@ final class AllureLifecycle implements AllureLifecycleInterface
             $this->logException(
                 'Attachment (UUID: {uuid}) not added (parent UUID: {parentUuid})',
                 $e,
-                ['uuid' => $attachment->getUuid(), 'parentUuid' => $context->getUuid()],
+                ['uuid' => $attachment->getUuid(), 'parentUuid' => $parentUuid],
             );
             $this->notifier->onLifecycleError($e);
         }
