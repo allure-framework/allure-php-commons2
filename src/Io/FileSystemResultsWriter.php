@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Qameta\Allure\Io;
 
 use JsonException;
@@ -17,16 +19,23 @@ use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\TestResult;
 use Throwable;
 
+use function bin2hex;
+use function dirname;
 use function error_clear_last;
 use function error_get_last;
 use function fclose;
+use function fflush;
 use function file_exists;
 use function fopen;
+use function function_exists;
 use function is_dir;
 use function mkdir;
+use function random_bytes;
 use function realpath;
+use function rename;
 use function rtrim;
 use function stream_copy_to_stream;
+use function unlink;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -115,15 +124,34 @@ class FileSystemResultsWriter implements ResultsWriterInterface
             if ($this->shouldCreateOutputDirectory()) {
                 $this->createOutputDirectory();
             }
-            $file = $this->getRealOutputDirectory() . DIRECTORY_SEPARATOR . $target;
-            $targetStream = $this->createTargetStream($file);
+            $directory = $this->getRealOutputDirectory();
+            $finalFile = $directory . DIRECTORY_SEPARATOR . $target;
+            $tempFile = $this->createTempPath($directory);
+            $published = false;
+            $synced = false;
             try {
-                $this->copyStream($sourceStream, $targetStream);
+                $targetStream = $this->createTargetStream($tempFile);
+                try {
+                    $this->copyStream($sourceStream, $targetStream);
+                    $this->syncStream($targetStream);
+                    $synced = true;
+                } finally {
+                    error_clear_last();
+                    $closeResult = @fclose($targetStream);
+                    if (!$closeResult) {
+                        $this->logLastError('Target stream not closed', error_get_last());
+                    }
+                }
+                $this->publishFile($tempFile, $finalFile);
+                $published = true;
+                $tempFile = null;
             } finally {
-                error_clear_last();
-                $closeResult = @fclose($targetStream);
-                if (!$closeResult) {
-                    $this->logLastError('Target stream not closed', error_get_last());
+                if (!$published && !$synced && null !== $tempFile) {
+                    error_clear_last();
+                    $unlinkResult = @unlink($tempFile);
+                    if (!$unlinkResult) {
+                        $this->logLastError('Incomplete temp file not removed', error_get_last());
+                    }
                 }
             }
         } finally {
@@ -176,6 +204,109 @@ class FileSystemResultsWriter implements ResultsWriterInterface
             $error = error_get_last();
             throw new StreamCopyFailedException($error['message'] ?? null);
         }
+    }
+
+    /**
+     * Durably sync a fully written staging stream before publish.
+     * Integrations may override this for a custom sync definition.
+     *
+     * @param resource $stream
+     */
+    protected function syncStream($stream): void
+    {
+        error_clear_last();
+        $flushResult = @fflush($stream);
+        if (!$flushResult) {
+            $error = error_get_last();
+            throw new IoFailedException($error['message'] ?? 'Failed to flush stream');
+        }
+        if (function_exists('fsync')) {
+            error_clear_last();
+            /** @var callable(resource):bool $fsync */
+            $fsync = 'fsync';
+            $syncResult = @$fsync($stream);
+            if (!$syncResult) {
+                $error = error_get_last();
+                throw new IoFailedException($error['message'] ?? 'Failed to sync stream');
+            }
+        }
+    }
+
+    /**
+     * Atomically publish a fully written temp file as the final artifact.
+     *
+     * @throws IoFailedException
+     */
+    protected function publishFile(string $tempFile, string $finalFile): void
+    {
+        if ($this->renamePath($tempFile, $finalFile)) {
+            return;
+        }
+        $renameError = error_get_last();
+
+        if (!file_exists($finalFile)) {
+            throw new IoFailedException(
+                $renameError['message'] ?? "Failed to rename {$tempFile} to {$finalFile}",
+            );
+        }
+
+        // Windows (and similar): rename over an existing file may fail. Move the old
+        // final aside, then publish the staged temp, then delete the aside backup.
+        $directory = dirname($finalFile);
+        $asideFile = $this->createTempPath($directory);
+
+        if (!$this->renamePath($finalFile, $asideFile)) {
+            $error = error_get_last();
+            throw new IoFailedException(
+                $error['message'] ?? "Failed to move aside existing file {$finalFile}",
+            );
+        }
+
+        if (!$this->renamePath($tempFile, $finalFile)) {
+            $error = error_get_last();
+            if (!$this->renamePath($asideFile, $finalFile)) {
+                $restoreError = error_get_last();
+                $this->logLastError(
+                    'Failed to restore aside backup to final path',
+                    $restoreError,
+                );
+                throw new IoFailedException(
+                    sprintf(
+                        'Failed to rename %s to %s; previous file left at %s%s',
+                        $tempFile,
+                        $finalFile,
+                        $asideFile,
+                        isset($restoreError['message']) ? ': ' . $restoreError['message'] : '',
+                    ),
+                );
+            }
+            throw new IoFailedException(
+                $error['message']
+                    ?? $renameError['message']
+                    ?? "Failed to rename {$tempFile} to {$finalFile}",
+            );
+        }
+
+        error_clear_last();
+        $unlinkResult = @unlink($asideFile);
+        if (!$unlinkResult) {
+            $this->logLastError('Aside backup not removed', error_get_last());
+        }
+    }
+
+    /**
+     * @return bool True when the rename succeeds.
+     */
+    protected function renamePath(string $from, string $to): bool
+    {
+        error_clear_last();
+
+        return @rename($from, $to);
+    }
+
+    private function createTempPath(string $directory): string
+    {
+        return $directory . DIRECTORY_SEPARATOR . '.allure-write-' . bin2hex(random_bytes(8)) . '.tmp';
     }
 
     /**
