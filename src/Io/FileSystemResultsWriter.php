@@ -59,17 +59,10 @@ class FileSystemResultsWriter implements ResultsWriterInterface
 
     private string $outputDirectory;
 
-    /** @var callable|null */
-    private $syncCallback;
-
-    public function __construct(
-        string $outputDirectory,
-        LoggerInterface $logger,
-        ?callable $syncCallback = null,
-    ) {
+    public function __construct(string $outputDirectory, LoggerInterface $logger)
+    {
         $this->outputDirectory = rtrim($outputDirectory, '\\/');
         $this->logger = $logger;
-        $this->syncCallback = $syncCallback;
     }
 
     /**
@@ -140,7 +133,7 @@ class FileSystemResultsWriter implements ResultsWriterInterface
                 $targetStream = $this->createTargetStream($tempFile);
                 try {
                     $this->copyStream($sourceStream, $targetStream);
-                    $this->syncTargetStream($targetStream);
+                    $this->syncStream($targetStream);
                     $synced = true;
                 } finally {
                     error_clear_last();
@@ -214,20 +207,9 @@ class FileSystemResultsWriter implements ResultsWriterInterface
     }
 
     /**
-     * @param resource $stream
-     */
-    private function syncTargetStream($stream): void
-    {
-        if (null !== $this->syncCallback) {
-            ($this->syncCallback)($stream);
-
-            return;
-        }
-
-        $this->syncStream($stream);
-    }
-
-    /**
+     * Durably sync a fully written staging stream before publish.
+     * Integrations may override this for a custom sync definition.
+     *
      * @param resource $stream
      */
     protected function syncStream($stream): void

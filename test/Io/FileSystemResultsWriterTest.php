@@ -17,10 +17,8 @@ use Throwable;
 
 use function array_filter;
 use function array_map;
-use function fflush;
 use function file_get_contents;
 use function file_put_contents;
-use function function_exists;
 use function glob;
 use function in_array;
 use function is_dir;
@@ -157,28 +155,20 @@ class FileSystemResultsWriterTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function testWrite_SuccessfulPublish_InvokesSyncCallbackOnce(): void
+    public function testWrite_SuccessfulPublish_InvokesSyncStreamOnce(): void
     {
-        $syncCalls = 0;
-        $writer = new FileSystemResultsWriter(
-            $this->outputDirectory,
-            new NullLogger(),
-            /**
-             * @param resource $stream
-             */
-            static function ($stream) use (&$syncCalls): void {
-                ++$syncCalls;
-                fflush($stream);
-                if (function_exists('fsync')) {
-                    /** @var callable(resource):bool $fsync */
-                    $fsync = 'fsync';
-                    $fsync($stream);
-                }
-            },
-        );
+        $writer = new class ($this->outputDirectory, new NullLogger()) extends FileSystemResultsWriter {
+            public int $syncCalls = 0;
+
+            protected function syncStream($stream): void
+            {
+                ++$this->syncCalls;
+                parent::syncStream($stream);
+            }
+        };
         $writer->writeTest(new TestResult('sync-uuid-1'));
 
-        self::assertSame(1, $syncCalls);
+        self::assertSame(1, $writer->syncCalls);
         $this->assertNoStagingTemps();
     }
 
