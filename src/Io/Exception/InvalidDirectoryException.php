@@ -11,7 +11,7 @@ final class InvalidDirectoryException extends RuntimeException
 {
     public function __construct(
         private string $directory,
-        Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct("Not a directory: {$this->directory}", 0, $previous);
     }

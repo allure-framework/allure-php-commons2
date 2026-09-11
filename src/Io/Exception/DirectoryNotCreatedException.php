@@ -12,7 +12,7 @@ final class DirectoryNotCreatedException extends RuntimeException
     public function __construct(
         private string $directory,
         ?string $message = null,
-        Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct($this->buildMessage($message), 0, $previous);
     }

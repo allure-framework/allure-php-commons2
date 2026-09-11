@@ -13,7 +13,7 @@ final class InvalidMethodNameException extends \DomainException
 {
     public function __construct(
         private mixed $methodName,
-        Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         $methodDescription = gettype($this->methodName);
         if (is_object($this->methodName)) {
