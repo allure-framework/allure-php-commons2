@@ -12,6 +12,7 @@ use Qameta\Allure\Internal\LifecycleBuilder;
 use Qameta\Allure\Io\DataSourceFactory;
 use Qameta\Allure\Io\DataSourceInterface;
 use Qameta\Allure\Io\ResultsWriterInterface;
+use Qameta\Allure\Model\Exception\InvalidGlobalErrorStatusException;
 use Qameta\Allure\Model\ExecutionContextInterface;
 use Qameta\Allure\Model\Label;
 use Qameta\Allure\Model\Link;
@@ -32,6 +33,7 @@ use ReflectionMethod;
 use Throwable;
 
 use function is_array;
+use function is_string;
 
 final class Allure
 {
@@ -200,31 +202,50 @@ final class Allure
 
     /**
      * Writes a global error that isn't related to a specific test, step, or fixture.
-     * If an exception instance is provided, fills the message and trace from it.
-     * Otherwise, a string message must be provided, optionally followed by a trace.
+     * Accepts a throwable, a message with optional trace, or an explicit failed/broken status.
+     *
+     * @throws InvalidGlobalErrorStatusException if status is neither failed nor broken
      */
-    public static function globalError(Throwable|string $value, ?string $trace = null): void
-    {
+    public static function globalError(
+        Status|Throwable|string $statusOrValue,
+        Throwable|string|null $valueOrTrace = null,
+        ?string $trace = null,
+    ): void {
         $instance = self::getInstance();
         $lifecycleBuilder = $instance->getLifecycleConfig();
+        $statusDetector = $lifecycleBuilder->getStatusDetector();
 
-        if ($value instanceof Throwable) {
-            $statusDetails = $lifecycleBuilder
-                ->getStatusDetector()
-                ->getStatusDetails($value);
+        if ($statusOrValue instanceof Status) {
+            $status = $statusOrValue;
 
+            if ($valueOrTrace instanceof Throwable) {
+                $statusDetails = $statusDetector->getStatusDetails($valueOrTrace);
+                $message = $statusDetails?->getMessage();
+                $trace = $statusDetails?->getTrace();
+            } elseif (is_string($valueOrTrace)) {
+                $message = $valueOrTrace;
+            } else {
+                $message = null;
+            }
+        } elseif ($statusOrValue instanceof Throwable) {
+            $status = $statusDetector->getStatus($statusOrValue) ?? Status::broken();
+
+            $statusDetails = $statusDetector->getStatusDetails($statusOrValue);
             $message = $statusDetails?->getMessage();
             $trace = $statusDetails?->getTrace();
         } else {
-            $message = $value;
+            $status = Status::broken();
+            $message = $statusOrValue;
+            $trace = is_string($valueOrTrace) ? $valueOrTrace : null;
         }
 
-        $factory = $instance
-            ->getLifecycleConfig()
-            ->getResultFactory();
+        self::assertGlobalErrorStatus($status);
+
+        $factory = $lifecycleBuilder->getResultFactory();
 
         $error = $factory
             ->createGlobalError()
+            ->setStatus($status)
             ->setMessage($message)
             ->setTrace($trace);
 
@@ -235,6 +256,16 @@ final class Allure
         $instance
             ->doGetLifecycle()
             ->addGlobals($globals);
+    }
+
+    /**
+     * @throws InvalidGlobalErrorStatusException
+     */
+    private static function assertGlobalErrorStatus(Status $status): void
+    {
+        if ($status !== Status::failed() && $status !== Status::broken()) {
+            throw new InvalidGlobalErrorStatusException((string) $status);
+        }
     }
 
     public static function epic(string $value): void
