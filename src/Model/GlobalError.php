@@ -10,6 +10,8 @@ final class GlobalError extends StatusDetails
 {
     protected SerializableDate $timestamp;
 
+    protected ?Status $status;
+
     public function __construct(
         DateTimeImmutable $timestamp,
         ?bool $known = null,
@@ -17,6 +19,7 @@ final class GlobalError extends StatusDetails
         ?bool $flaky = null,
         ?string $message = null,
         ?string $trace = null,
+        ?Status $status = null,
     ) {
         parent::__construct(
             known: $known,
@@ -27,6 +30,7 @@ final class GlobalError extends StatusDetails
         );
 
         $this->timestamp = new SerializableDate($timestamp);
+        $this->status = $status;
     }
 
     public function getTimestamp(): DateTimeImmutable
@@ -37,6 +41,18 @@ final class GlobalError extends StatusDetails
     public function setTimestamp(DateTimeImmutable $timestamp): self
     {
         $this->timestamp = new SerializableDate($timestamp);
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
