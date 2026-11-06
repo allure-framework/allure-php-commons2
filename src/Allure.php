@@ -385,6 +385,34 @@ final class Allure
         );
     }
 
+    public static function precondition(string $precondition): void
+    {
+        self::getLifecycle()->updateTest(
+            fn (TestResult $test) => $test->setPrecondition($precondition),
+        );
+    }
+
+    public static function preconditionHtml(string $preconditionHtml): void
+    {
+        self::getLifecycle()->updateTest(
+            fn (TestResult $test) => $test->setPreconditionHtml($preconditionHtml),
+        );
+    }
+
+    public static function expectedResult(string $expectedResult): void
+    {
+        self::getLifecycle()->updateTest(
+            fn (TestResult $test) => $test->setExpectedResult($expectedResult),
+        );
+    }
+
+    public static function expectedResultHtml(string $expectedResultHtml): void
+    {
+        self::getLifecycle()->updateTest(
+            fn (TestResult $test) => $test->setExpectedResultHtml($expectedResultHtml),
+        );
+    }
+
     public static function getLifecycle(): AllureLifecycleInterface
     {
         return self::getInstance()->doGetLifecycle();

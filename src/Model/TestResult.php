@@ -16,6 +16,14 @@ final class TestResult extends ExecutionContext
 
     protected ?string $fullName = null;
 
+    protected ?string $precondition = null;
+
+    protected ?string $preconditionHtml = null;
+
+    protected ?string $expectedResult = null;
+
+    protected ?string $expectedResultHtml = null;
+
     /**
      * @var list<string>
      */
@@ -84,6 +92,54 @@ final class TestResult extends ExecutionContext
         return $this;
     }
 
+    public function getPrecondition(): ?string
+    {
+        return $this->precondition;
+    }
+
+    public function setPrecondition(?string $precondition): self
+    {
+        $this->precondition = $precondition;
+
+        return $this;
+    }
+
+    public function getPreconditionHtml(): ?string
+    {
+        return $this->preconditionHtml;
+    }
+
+    public function setPreconditionHtml(?string $preconditionHtml): self
+    {
+        $this->preconditionHtml = $preconditionHtml;
+
+        return $this;
+    }
+
+    public function getExpectedResult(): ?string
+    {
+        return $this->expectedResult;
+    }
+
+    public function setExpectedResult(?string $expectedResult): self
+    {
+        $this->expectedResult = $expectedResult;
+
+        return $this;
+    }
+
+    public function getExpectedResultHtml(): ?string
+    {
+        return $this->expectedResultHtml;
+    }
+
+    public function setExpectedResultHtml(?string $expectedResultHtml): self
+    {
+        $this->expectedResultHtml = $expectedResultHtml;
+
+        return $this;
+    }
+
     /**
      * @return list<string>
      */
@@ -137,5 +193,20 @@ final class TestResult extends ExecutionContext
         $this->links = array_values($links);
 
         return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function excludeFromSerialization(): array
+    {
+        $excluded = parent::excludeFromSerialization();
+        foreach (['precondition', 'preconditionHtml', 'expectedResult', 'expectedResultHtml'] as $field) {
+            if ($this->$field === null) {
+                $excluded[] = $field;
+            }
+        }
+
+        return $excluded;
     }
 }
