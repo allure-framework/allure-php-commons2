@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Qameta\Allure\Attribute;
 
 use Closure;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Qameta\Allure\Exception\InvalidMethodNameException;
 use Qameta\Allure\Model;
 use Qameta\Allure\Model\ModelProviderInterface;
@@ -73,10 +72,7 @@ final class AttributeParser implements ModelProviderInterface
         ?string $property = null,
         ?LinkTemplateCollectionInterface $linkTemplates = null,
     ): array {
-        $reader = new LegacyAttributeReader(
-            new AnnotationReader(),
-            new AttributeReader(),
-        );
+        $reader = new AttributeReader();
         $annotations = [];
 
         if (isset($classOrObject)) {
