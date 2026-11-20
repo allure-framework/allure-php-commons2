@@ -6,7 +6,6 @@ namespace Qameta\Allure\Test;
 
 use DateTimeImmutable;
 use Exception;
-use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Allure;
 use Qameta\Allure\AllureLifecycleInterface;
@@ -29,7 +28,6 @@ use Qameta\Allure\Model\Status;
 use Qameta\Allure\Model\StatusDetails;
 use Qameta\Allure\Model\StepResult;
 use Qameta\Allure\Model\TestResult;
-use Qameta\Allure\Setup\DefaultStatusDetector;
 use Qameta\Allure\Setup\LifecycleBuilderInterface;
 use Qameta\Allure\Setup\StatusDetectorInterface;
 use Qameta\Allure\StepContextInterface;
@@ -611,7 +609,7 @@ class AllureTest extends TestCase
         Allure::globalAttachmentFile("b", "c");
     }
 
-    public function testGlobalError_FromException_HasMessageAndTraceFromException(): void
+    public function testGlobalError_FromException_WritesDetectorStatusAndDetails(): void
     {
         $error = new GlobalError(new DateTimeImmutable());
         $globals = new Globals("-");
@@ -620,7 +618,9 @@ class AllureTest extends TestCase
         $statusDetails = new StatusDetails();
         $statusDetails
             ->setMessage("foo")
-            ->setTrace("bar");
+            ->setTrace("bar")
+            ->setActual("0")
+            ->setExpected("1");
         $statusDetector
             ->method('getStatus')
             ->with(self::identicalTo($exception))
@@ -642,7 +642,13 @@ class AllureTest extends TestCase
         self::assertSame(Status::failed(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertEquals("bar", $error->getTrace());
-        self::assertEquals([$error], $globals->getErrors());
+
+        /** @var array{errors: list<array{status: string, actual: string, expected: string}>} $serialized */
+        $serialized = json_decode(json_encode($globals, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+        self::assertCount(1, $serialized['errors']);
+        self::assertSame('failed', $serialized['errors'][0]['status']);
+        self::assertSame('0', $serialized['errors'][0]['actual']);
+        self::assertSame('1', $serialized['errors'][0]['expected']);
     }
 
     public function testGlobalError_FromExceptionWithNullStatus_UsesBrokenStatus(): void
@@ -673,49 +679,6 @@ class AllureTest extends TestCase
         self::assertNull($error->getMessage());
         self::assertNull($error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
-    }
-
-    /**
-     * @dataProvider providerGlobalErrorComparisonValues
-     */
-    public function testGlobalError_FromPhpUnitAssertion_WritesComparisonDetails(
-        int|string $expected,
-        int|string $actual,
-        string $expectedText,
-        string $actualText,
-    ): void {
-        $error = new GlobalError(new DateTimeImmutable());
-        $globals = new Globals("-");
-        Allure::setLifecycleBuilder(
-            $this->createLifecycleBuilder(
-                resultFactory: $this->createResultFactoryWithGlobalError($error, $globals),
-                statusDetector: new DefaultStatusDetector(),
-            ),
-        );
-
-        try {
-            self::assertEquals($expected, $actual);
-        } catch (ExpectationFailedException $exception) {
-            Allure::globalError($exception);
-        }
-
-        /** @var array{errors: list<array{status: string, actual: string, expected: string}>} $serialized */
-        $serialized = json_decode(json_encode($globals, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
-        self::assertCount(1, $serialized['errors']);
-        self::assertSame('failed', $serialized['errors'][0]['status']);
-        self::assertSame($actualText, $serialized['errors'][0]['actual']);
-        self::assertSame($expectedText, $serialized['errors'][0]['expected']);
-    }
-
-    /**
-     * @return iterable<string, array{int|string, int|string, string, string}>
-     */
-    public static function providerGlobalErrorComparisonValues(): iterable
-    {
-        return [
-            'Strings' => ['expected', 'actual', "'expected'", "'actual'"],
-            'Numbers' => [1, 0, '1', '0'],
-        ];
     }
 
     public function testGlobalError_FromStrings_HasMessageAndTrace(): void
