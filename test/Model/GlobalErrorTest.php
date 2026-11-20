@@ -6,6 +6,7 @@ namespace Qameta\Allure\Test\Model;
 
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Model\GlobalError;
+use Qameta\Allure\Model\GlobalErrorStatus;
 use DateTimeImmutable;
 use DateTimeInterface;
 
@@ -25,6 +26,30 @@ class GlobalErrorTest extends TestCase
         self::assertEquals($date, $globalError->getTimestamp());
     }
 
+    public function testGetStatus_ConstructedWithStatus_ReturnsProvidedValue(): void
+    {
+        $globalError = new GlobalError(
+            timestamp: new DateTimeImmutable(),
+            status: GlobalErrorStatus::failed(),
+        );
+
+        self::assertSame(GlobalErrorStatus::failed(), $globalError->getStatus());
+    }
+
+    public function testConstruct_PositionalKnownAfterTimestamp_PreservesLegacyArgumentOrder(): void
+    {
+        $date = new DateTimeImmutable();
+        $globalError = new GlobalError($date, true, false, true, "foo", "bar");
+
+        self::assertEquals($date, $globalError->getTimestamp());
+        self::assertTrue($globalError->isKnown());
+        self::assertFalse($globalError->isMuted());
+        self::assertTrue($globalError->isFlaky());
+        self::assertEquals("foo", $globalError->getMessage());
+        self::assertEquals("bar", $globalError->getTrace());
+        self::assertNull($globalError->getStatus());
+    }
+
     public function testStatusDetailsProperties_ConstructedWithAllArguments_ReturnProvidedValues(): void
     {
         $globalError = new GlobalError(
@@ -34,8 +59,10 @@ class GlobalErrorTest extends TestCase
             flaky: true,
             message: "foo",
             trace: "bar",
+            status: GlobalErrorStatus::broken(),
         );
 
+        self::assertSame(GlobalErrorStatus::broken(), $globalError->getStatus());
         self::assertTrue($globalError->isKnown());
         self::assertTrue($globalError->isMuted());
         self::assertTrue($globalError->isFlaky());
@@ -70,6 +97,14 @@ class GlobalErrorTest extends TestCase
         );
     }
 
+    public function testSetStatus_ReturnsObjectItselfAndUpdatesValue(): void
+    {
+        $globalError = new GlobalError(new DateTimeImmutable());
+
+        self::assertSame($globalError, $globalError->setStatus(GlobalErrorStatus::failed()));
+        self::assertSame(GlobalErrorStatus::failed(), $globalError->getStatus());
+    }
+
     public function testJsonSerialization_WithAllProperties_JsonContainsAllProperties(): void
     {
         /**
@@ -86,6 +121,7 @@ class GlobalErrorTest extends TestCase
             flaky: true,
             message: "foo",
             trace: "bar",
+            status: GlobalErrorStatus::failed(),
         );
 
         $json = json_encode($globalError);
@@ -94,6 +130,7 @@ class GlobalErrorTest extends TestCase
         $parsed = json_decode($json);
 
         self::assertEquals(1577874031000, $parsed->timestamp);
+        self::assertEquals("failed", $parsed->status);
         self::assertEquals("foo", $parsed->message);
         self::assertEquals("bar", $parsed->trace);
         self::assertTrue($parsed->known);

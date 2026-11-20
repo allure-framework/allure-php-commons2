@@ -18,6 +18,7 @@ use Qameta\Allure\Io\StringDataSource;
 use Qameta\Allure\Model\AttachmentResult;
 use Qameta\Allure\Model\GlobalAttachment;
 use Qameta\Allure\Model\GlobalError;
+use Qameta\Allure\Model\GlobalErrorStatus;
 use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\ParameterMode;
@@ -32,6 +33,10 @@ use Qameta\Allure\Setup\StatusDetectorInterface;
 use Qameta\Allure\StepContextInterface;
 use Throwable;
 
+use function json_decode;
+use function json_encode;
+
+use const JSON_THROW_ON_ERROR;
 use const STDOUT;
 
 /**
@@ -604,7 +609,7 @@ class AllureTest extends TestCase
         Allure::globalAttachmentFile("b", "c");
     }
 
-    public function testGlobalError_FromException_HasMessageAndTraceFromException(): void
+    public function testGlobalError_FromException_WritesDetectorStatusAndDetails(): void
     {
         $error = new GlobalError(new DateTimeImmutable());
         $globals = new Globals("-");
@@ -613,7 +618,13 @@ class AllureTest extends TestCase
         $statusDetails = new StatusDetails();
         $statusDetails
             ->setMessage("foo")
-            ->setTrace("bar");
+            ->setTrace("bar")
+            ->setActual("0")
+            ->setExpected("1");
+        $statusDetector
+            ->method('getStatus')
+            ->with(self::identicalTo($exception))
+            ->willReturn(Status::failed());
         $statusDetector
             ->method('getStatusDetails')
             ->with(self::identicalTo($exception))
@@ -628,8 +639,45 @@ class AllureTest extends TestCase
 
         Allure::globalError($exception);
 
+        self::assertSame(GlobalErrorStatus::failed(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertEquals("bar", $error->getTrace());
+
+        /** @var array{errors: list<array{status: string, actual: string, expected: string}>} $serialized */
+        $serialized = json_decode(json_encode($globals, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+        self::assertCount(1, $serialized['errors']);
+        self::assertSame('failed', $serialized['errors'][0]['status']);
+        self::assertSame('0', $serialized['errors'][0]['actual']);
+        self::assertSame('1', $serialized['errors'][0]['expected']);
+    }
+
+    public function testGlobalError_FromExceptionWithNullStatus_UsesBrokenStatus(): void
+    {
+        $error = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+        $exception = new Exception();
+        $statusDetector = $this->createMock(StatusDetectorInterface::class);
+        $statusDetector
+            ->method('getStatus')
+            ->with(self::identicalTo($exception))
+            ->willReturn(null);
+        $statusDetector
+            ->method('getStatusDetails')
+            ->with(self::identicalTo($exception))
+            ->willReturn(null);
+
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                resultFactory: $this->createResultFactoryWithGlobalError($error, $globals),
+                statusDetector: $statusDetector,
+            ),
+        );
+
+        Allure::globalError($exception);
+
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
+        self::assertNull($error->getMessage());
+        self::assertNull($error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
     }
 
@@ -644,8 +692,9 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::globalError("foo", "bar");
+        Allure::globalError(value: "foo", trace: "bar");
 
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertEquals("bar", $error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
@@ -664,9 +713,100 @@ class AllureTest extends TestCase
 
         Allure::globalError("foo");
 
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertNull($error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
+    }
+
+    public function testGlobalError_ExplicitStatusWithException_OverridesDetectorStatus(): void
+    {
+        $error = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+        $exception = new Exception();
+        $statusDetector = $this->createMock(StatusDetectorInterface::class);
+        $statusDetails = new StatusDetails();
+        $statusDetails
+            ->setMessage("foo")
+            ->setTrace("bar");
+        $statusDetector
+            ->expects(self::never())
+            ->method('getStatus');
+        $statusDetector
+            ->method('getStatusDetails')
+            ->with(self::identicalTo($exception))
+            ->willReturn($statusDetails);
+
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                resultFactory: $this->createResultFactoryWithGlobalError($error, $globals),
+                statusDetector: $statusDetector,
+            ),
+        );
+
+        Allure::globalError($exception, status: GlobalErrorStatus::failed());
+
+        self::assertSame(GlobalErrorStatus::failed(), $error->getStatus());
+        self::assertEquals("foo", $error->getMessage());
+        self::assertEquals("bar", $error->getTrace());
+        self::assertEquals([$error], $globals->getErrors());
+    }
+
+    public function testGlobalError_ExplicitStatusWithMessageAndTrace_HasProvidedValues(): void
+    {
+        $error = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                $this->createResultFactoryWithGlobalError($error, $globals),
+            ),
+        );
+
+        Allure::globalError("foo", "bar", GlobalErrorStatus::failed());
+
+        self::assertSame(GlobalErrorStatus::failed(), $error->getStatus());
+        self::assertEquals("foo", $error->getMessage());
+        self::assertEquals("bar", $error->getTrace());
+        self::assertEquals([$error], $globals->getErrors());
+    }
+
+    /**
+     * @dataProvider providerNonErrorDetectorStatus
+     */
+    public function testGlobalError_FromExceptionWithNonErrorStatus_UsesBrokenStatus(Status $status): void
+    {
+        $error = new GlobalError(new DateTimeImmutable());
+        $globals = new Globals("-");
+        $exception = new Exception();
+        $statusDetector = $this->createMock(StatusDetectorInterface::class);
+        $statusDetector
+            ->method('getStatus')
+            ->with(self::identicalTo($exception))
+            ->willReturn($status);
+
+        Allure::setLifecycleBuilder(
+            $this->createLifecycleBuilder(
+                resultFactory: $this->createResultFactoryWithGlobalError($error, $globals),
+                statusDetector: $statusDetector,
+            ),
+        );
+
+        Allure::globalError($exception);
+
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
+        self::assertSame([$error], $globals->getErrors());
+    }
+
+    /**
+     * @return iterable<string, array{Status}>
+     */
+    public static function providerNonErrorDetectorStatus(): iterable
+    {
+        return [
+            'Passed' => [Status::passed()],
+            'Skipped' => [Status::skipped()],
+        ];
     }
 
     public function testGlobalError_ResultFactoryProvidesErrort_GlobalsAddedToLifecycle(): void

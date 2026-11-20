@@ -13,6 +13,7 @@ use Qameta\Allure\Io\DataSourceFactory;
 use Qameta\Allure\Io\DataSourceInterface;
 use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Model\ExecutionContextInterface;
+use Qameta\Allure\Model\GlobalErrorStatus;
 use Qameta\Allure\Model\Label;
 use Qameta\Allure\Model\Link;
 use Qameta\Allure\Model\LinkType;
@@ -200,33 +201,41 @@ final class Allure
 
     /**
      * Writes a global error that isn't related to a specific test, step, or fixture.
-     * If an exception instance is provided, fills the message and trace from it.
-     * Otherwise, a string message must be provided, optionally followed by a trace.
+     * Extracts details from a throwable or uses a message with an optional trace.
+     * A throwable is classified by the status detector. A message defaults to broken.
+     * An explicit failed or broken status takes precedence.
      */
-    public static function globalError(Throwable|string $value, ?string $trace = null): void
-    {
+    public static function globalError(
+        Throwable|string $value,
+        ?string $trace = null,
+        ?GlobalErrorStatus $status = null,
+    ): void {
         $instance = self::getInstance();
-        $lifecycleBuilder = $instance->getLifecycleConfig();
+        $config = $instance->getLifecycleConfig();
+        $details = null;
 
         if ($value instanceof Throwable) {
-            $statusDetails = $lifecycleBuilder
-                ->getStatusDetector()
-                ->getStatusDetails($value);
-
-            $message = $statusDetails?->getMessage();
-            $trace = $statusDetails?->getTrace();
+            $statusDetector = $config->getStatusDetector();
+            $status ??= $statusDetector->getStatus($value) === Status::failed()
+                ? GlobalErrorStatus::failed()
+                : GlobalErrorStatus::broken();
+            $details = $statusDetector->getStatusDetails($value);
+            $message = $details?->getMessage();
+            $trace = $details?->getTrace();
         } else {
+            $status ??= GlobalErrorStatus::broken();
             $message = $value;
         }
 
-        $factory = $instance
-            ->getLifecycleConfig()
-            ->getResultFactory();
+        $factory = $config->getResultFactory();
 
         $error = $factory
             ->createGlobalError()
+            ->setStatus($status)
             ->setMessage($message)
-            ->setTrace($trace);
+            ->setTrace($trace)
+            ->setActual($details?->getActual())
+            ->setExpected($details?->getExpected());
 
         $globals = $factory
             ->createGlobals()
