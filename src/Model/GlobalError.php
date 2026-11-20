@@ -10,7 +10,7 @@ final class GlobalError extends StatusDetails
 {
     protected SerializableDate $timestamp;
 
-    protected ?Status $status;
+    protected ?GlobalErrorStatus $status;
 
     public function __construct(
         DateTimeImmutable $timestamp,
@@ -19,7 +19,7 @@ final class GlobalError extends StatusDetails
         ?bool $flaky = null,
         ?string $message = null,
         ?string $trace = null,
-        ?Status $status = null,
+        ?GlobalErrorStatus $status = null,
     ) {
         parent::__construct(
             known: $known,
@@ -45,12 +45,12 @@ final class GlobalError extends StatusDetails
         return $this;
     }
 
-    public function getStatus(): ?Status
+    public function getStatus(): ?GlobalErrorStatus
     {
         return $this->status;
     }
 
-    public function setStatus(?Status $status): self
+    public function setStatus(?GlobalErrorStatus $status): self
     {
         $this->status = $status;
 

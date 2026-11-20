@@ -16,9 +16,9 @@ use Qameta\Allure\Io\ResultsWriterInterface;
 use Qameta\Allure\Io\StreamDataSource;
 use Qameta\Allure\Io\StringDataSource;
 use Qameta\Allure\Model\AttachmentResult;
-use Qameta\Allure\Model\Exception\InvalidGlobalErrorStatusException;
 use Qameta\Allure\Model\GlobalAttachment;
 use Qameta\Allure\Model\GlobalError;
+use Qameta\Allure\Model\GlobalErrorStatus;
 use Qameta\Allure\Model\Globals;
 use Qameta\Allure\Model\LinkType;
 use Qameta\Allure\Model\ParameterMode;
@@ -639,7 +639,7 @@ class AllureTest extends TestCase
 
         Allure::globalError($exception);
 
-        self::assertSame(Status::failed(), $error->getStatus());
+        self::assertSame(GlobalErrorStatus::failed(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertEquals("bar", $error->getTrace());
 
@@ -675,7 +675,7 @@ class AllureTest extends TestCase
 
         Allure::globalError($exception);
 
-        self::assertSame(Status::broken(), $error->getStatus());
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
         self::assertNull($error->getMessage());
         self::assertNull($error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
@@ -694,7 +694,7 @@ class AllureTest extends TestCase
 
         Allure::globalError(value: "foo", trace: "bar");
 
-        self::assertSame(Status::broken(), $error->getStatus());
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertEquals("bar", $error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
@@ -713,7 +713,7 @@ class AllureTest extends TestCase
 
         Allure::globalError("foo");
 
-        self::assertSame(Status::broken(), $error->getStatus());
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertNull($error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
@@ -744,9 +744,9 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::globalError($exception, status: Status::failed());
+        Allure::globalError($exception, status: GlobalErrorStatus::failed());
 
-        self::assertSame(Status::failed(), $error->getStatus());
+        self::assertSame(GlobalErrorStatus::failed(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertEquals("bar", $error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
@@ -763,35 +763,16 @@ class AllureTest extends TestCase
             ),
         );
 
-        Allure::globalError("foo", "bar", Status::failed());
+        Allure::globalError("foo", "bar", GlobalErrorStatus::failed());
 
-        self::assertSame(Status::failed(), $error->getStatus());
+        self::assertSame(GlobalErrorStatus::failed(), $error->getStatus());
         self::assertEquals("foo", $error->getMessage());
         self::assertEquals("bar", $error->getTrace());
         self::assertEquals([$error], $globals->getErrors());
     }
 
     /**
-     * @dataProvider providerInvalidGlobalErrorStatus
-     */
-    public function testGlobalError_InvalidStatus_ThrowsException(Status $status): void
-    {
-        $error = new GlobalError(new DateTimeImmutable());
-        $globals = new Globals("-");
-
-        Allure::setLifecycleBuilder(
-            $this->createLifecycleBuilder(
-                $this->createResultFactoryWithGlobalError($error, $globals),
-            ),
-        );
-
-        $this->expectException(InvalidGlobalErrorStatusException::class);
-
-        Allure::globalError('foo', status: $status);
-    }
-
-    /**
-     * @dataProvider providerInvalidGlobalErrorStatus
+     * @dataProvider providerNonErrorDetectorStatus
      */
     public function testGlobalError_FromExceptionWithNonErrorStatus_UsesBrokenStatus(Status $status): void
     {
@@ -813,14 +794,14 @@ class AllureTest extends TestCase
 
         Allure::globalError($exception);
 
-        self::assertSame(Status::broken(), $error->getStatus());
+        self::assertSame(GlobalErrorStatus::broken(), $error->getStatus());
         self::assertSame([$error], $globals->getErrors());
     }
 
     /**
      * @return iterable<string, array{Status}>
      */
-    public static function providerInvalidGlobalErrorStatus(): iterable
+    public static function providerNonErrorDetectorStatus(): iterable
     {
         return [
             'Passed' => [Status::passed()],

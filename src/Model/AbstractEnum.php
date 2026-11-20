@@ -19,7 +19,7 @@ abstract class AbstractEnum implements Stringable
 
     protected static function create(string $value): static
     {
-        return self::$instances[$value] ??= new static($value);
+        return self::$instances[static::class . ':' . $value] ??= new static($value);
     }
 
     final public function __toString(): string

@@ -6,7 +6,7 @@ namespace Qameta\Allure\Test\Model;
 
 use PHPUnit\Framework\TestCase;
 use Qameta\Allure\Model\GlobalError;
-use Qameta\Allure\Model\Status;
+use Qameta\Allure\Model\GlobalErrorStatus;
 use DateTimeImmutable;
 use DateTimeInterface;
 
@@ -30,10 +30,10 @@ class GlobalErrorTest extends TestCase
     {
         $globalError = new GlobalError(
             timestamp: new DateTimeImmutable(),
-            status: Status::failed(),
+            status: GlobalErrorStatus::failed(),
         );
 
-        self::assertSame(Status::failed(), $globalError->getStatus());
+        self::assertSame(GlobalErrorStatus::failed(), $globalError->getStatus());
     }
 
     public function testConstruct_PositionalKnownAfterTimestamp_PreservesLegacyArgumentOrder(): void
@@ -59,10 +59,10 @@ class GlobalErrorTest extends TestCase
             flaky: true,
             message: "foo",
             trace: "bar",
-            status: Status::broken(),
+            status: GlobalErrorStatus::broken(),
         );
 
-        self::assertSame(Status::broken(), $globalError->getStatus());
+        self::assertSame(GlobalErrorStatus::broken(), $globalError->getStatus());
         self::assertTrue($globalError->isKnown());
         self::assertTrue($globalError->isMuted());
         self::assertTrue($globalError->isFlaky());
@@ -101,8 +101,8 @@ class GlobalErrorTest extends TestCase
     {
         $globalError = new GlobalError(new DateTimeImmutable());
 
-        self::assertSame($globalError, $globalError->setStatus(Status::failed()));
-        self::assertSame(Status::failed(), $globalError->getStatus());
+        self::assertSame($globalError, $globalError->setStatus(GlobalErrorStatus::failed()));
+        self::assertSame(GlobalErrorStatus::failed(), $globalError->getStatus());
     }
 
     public function testJsonSerialization_WithAllProperties_JsonContainsAllProperties(): void
@@ -121,7 +121,7 @@ class GlobalErrorTest extends TestCase
             flaky: true,
             message: "foo",
             trace: "bar",
-            status: Status::failed(),
+            status: GlobalErrorStatus::failed(),
         );
 
         $json = json_encode($globalError);

@@ -12,8 +12,8 @@ use Qameta\Allure\Internal\LifecycleBuilder;
 use Qameta\Allure\Io\DataSourceFactory;
 use Qameta\Allure\Io\DataSourceInterface;
 use Qameta\Allure\Io\ResultsWriterInterface;
-use Qameta\Allure\Model\Exception\InvalidGlobalErrorStatusException;
 use Qameta\Allure\Model\ExecutionContextInterface;
+use Qameta\Allure\Model\GlobalErrorStatus;
 use Qameta\Allure\Model\Label;
 use Qameta\Allure\Model\Link;
 use Qameta\Allure\Model\LinkType;
@@ -204,18 +204,12 @@ final class Allure
      * Extracts details from a throwable or uses a message with an optional trace.
      * A throwable is classified by the status detector. A message defaults to broken.
      * An explicit failed or broken status takes precedence.
-     *
-     * @throws InvalidGlobalErrorStatusException if status is neither failed nor broken
      */
     public static function globalError(
         Throwable|string $value,
         ?string $trace = null,
-        ?Status $status = null,
+        ?GlobalErrorStatus $status = null,
     ): void {
-        if ($status !== null) {
-            self::assertGlobalErrorStatus($status);
-        }
-
         $instance = self::getInstance();
         $config = $instance->getLifecycleConfig();
         $details = null;
@@ -223,13 +217,13 @@ final class Allure
         if ($value instanceof Throwable) {
             $statusDetector = $config->getStatusDetector();
             $status ??= $statusDetector->getStatus($value) === Status::failed()
-                ? Status::failed()
-                : Status::broken();
+                ? GlobalErrorStatus::failed()
+                : GlobalErrorStatus::broken();
             $details = $statusDetector->getStatusDetails($value);
             $message = $details?->getMessage();
             $trace = $details?->getTrace();
         } else {
-            $status ??= Status::broken();
+            $status ??= GlobalErrorStatus::broken();
             $message = $value;
         }
 
@@ -250,16 +244,6 @@ final class Allure
         $instance
             ->doGetLifecycle()
             ->addGlobals($globals);
-    }
-
-    /**
-     * @throws InvalidGlobalErrorStatusException
-     */
-    private static function assertGlobalErrorStatus(Status $status): void
-    {
-        if ($status !== Status::failed() && $status !== Status::broken()) {
-            throw new InvalidGlobalErrorStatusException((string) $status);
-        }
     }
 
     public static function epic(string $value): void
