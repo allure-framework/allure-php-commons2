@@ -10,6 +10,9 @@ class StatusDetails implements JsonSerializable
 {
     use JsonSerializableTrait;
 
+    private ?string $actual = null;
+    private ?string $expected = null;
+
     public function __construct(
         protected ?bool $known = null,
         protected ?bool $muted = null,
@@ -77,5 +80,45 @@ class StatusDetails implements JsonSerializable
         $this->trace = $trace;
 
         return $this;
+    }
+
+    public function getActual(): ?string
+    {
+        return $this->actual;
+    }
+
+    public function setActual(?string $actual): static
+    {
+        $this->actual = $actual;
+
+        return $this;
+    }
+
+    public function getExpected(): ?string
+    {
+        return $this->expected;
+    }
+
+    public function setExpected(?string $expected): static
+    {
+        $this->expected = $expected;
+
+        return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function excludeFromSerialization(): array
+    {
+        $excluded = [];
+        if ($this->actual === null) {
+            $excluded[] = 'actual';
+        }
+        if ($this->expected === null) {
+            $excluded[] = 'expected';
+        }
+
+        return $excluded;
     }
 }

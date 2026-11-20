@@ -33,7 +33,6 @@ use ReflectionMethod;
 use Throwable;
 
 use function is_array;
-use function is_string;
 
 final class Allure
 {
@@ -202,52 +201,47 @@ final class Allure
 
     /**
      * Writes a global error that isn't related to a specific test, step, or fixture.
-     * Accepts a throwable, a message with optional trace, or an explicit failed/broken status.
+     * Extracts details from a throwable or uses a message with an optional trace.
+     * A throwable is classified by the status detector. A message defaults to broken.
+     * An explicit failed or broken status takes precedence.
      *
      * @throws InvalidGlobalErrorStatusException if status is neither failed nor broken
      */
     public static function globalError(
-        Status|Throwable|string $statusOrValue,
-        Throwable|string|null $valueOrTrace = null,
+        Throwable|string $value,
         ?string $trace = null,
+        ?Status $status = null,
     ): void {
-        $instance = self::getInstance();
-        $lifecycleBuilder = $instance->getLifecycleConfig();
-        $statusDetector = $lifecycleBuilder->getStatusDetector();
-
-        if ($statusOrValue instanceof Status) {
-            $status = $statusOrValue;
-
-            if ($valueOrTrace instanceof Throwable) {
-                $statusDetails = $statusDetector->getStatusDetails($valueOrTrace);
-                $message = $statusDetails?->getMessage();
-                $trace = $statusDetails?->getTrace();
-            } elseif (is_string($valueOrTrace)) {
-                $message = $valueOrTrace;
-            } else {
-                $message = null;
-            }
-        } elseif ($statusOrValue instanceof Throwable) {
-            $status = $statusDetector->getStatus($statusOrValue) ?? Status::broken();
-
-            $statusDetails = $statusDetector->getStatusDetails($statusOrValue);
-            $message = $statusDetails?->getMessage();
-            $trace = $statusDetails?->getTrace();
-        } else {
-            $status = Status::broken();
-            $message = $statusOrValue;
-            $trace = is_string($valueOrTrace) ? $valueOrTrace : null;
+        if ($status !== null) {
+            self::assertGlobalErrorStatus($status);
         }
 
-        self::assertGlobalErrorStatus($status);
+        $instance = self::getInstance();
+        $config = $instance->getLifecycleConfig();
+        $details = null;
 
-        $factory = $lifecycleBuilder->getResultFactory();
+        if ($value instanceof Throwable) {
+            $statusDetector = $config->getStatusDetector();
+            $status ??= $statusDetector->getStatus($value) === Status::failed()
+                ? Status::failed()
+                : Status::broken();
+            $details = $statusDetector->getStatusDetails($value);
+            $message = $details?->getMessage();
+            $trace = $details?->getTrace();
+        } else {
+            $status ??= Status::broken();
+            $message = $value;
+        }
+
+        $factory = $config->getResultFactory();
 
         $error = $factory
             ->createGlobalError()
             ->setStatus($status)
             ->setMessage($message)
-            ->setTrace($trace);
+            ->setTrace($trace)
+            ->setActual($details?->getActual())
+            ->setExpected($details?->getExpected());
 
         $globals = $factory
             ->createGlobals()
